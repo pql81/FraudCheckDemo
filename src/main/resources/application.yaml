@@ -1,0 +1,63 @@
+spring.datasource:
+  url: jdbc:h2:mem:transdb
+  driverClassName: org.h2.Driver
+  username: sa
+  password:
+
+spring.jpa:
+  database-platform: org.hibernate.dialect.H2Dialect
+  hibernate.ddl-auto: update
+
+spring.h2.console.enabled: true
+spring.jpa.open-in-view: false
+
+spring.security.user.password: test123
+
+management.health:
+  circuitbreakers.enabled: true
+  circuitbreakerevents.enabled: true
+  ratelimiters.enabled: true
+management.endpoints.web.exposure.include: health,info,metrics,circuitbreakers,circuitbreakerevents,ratelimiters
+
+thread.pool.core.size: 10
+thread.pool.max.size: 50
+
+rest.template.connection.timeout.millis: 100
+rest.template.read.timeout.millis: 100
+
+card.service.url: https://card-service:9090
+transaction.service.url: https://transaction-service:9091
+
+#server.ssl:
+#  enabled: true
+#  key-store-type: PKCS12
+#  key-store: classpath:keystore/keystore.p12
+#  key-store-password: changeit
+#  protocol: TLS
+#  enabled-protocols: TLSv1.2
+
+resilience4j.retry:
+  configs:
+    default:
+      maxRetryAttempts: 2
+      waitDuration: 100
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
+      slidingWindowSize: 15
+      minimumNumberOfCalls: 50
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 10000
+      slowCallDurationThreshold: 1000
+      slowCallRateThreshold: 75
+      eventConsumerBufferSize: 10
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.util.concurrent.TimeoutException
+        - java.io.IOException
+      ignoreExceptions:
+        - org.springframework.web.client.HttpClientErrorException
+        - java.net.UnknownHostException
