@@ -5,12 +5,12 @@ import com.pql.fraudcheck.exception.CurrencyException;
 import com.pql.fraudcheck.exception.FraudCheckException;
 import com.pql.fraudcheck.exception.TerminalException;
 import com.pql.fraudcheck.rules.FraudRulesHandler;
-import com.pql.fraudcheck.util.CurrencyThreshold;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.money.Monetary;
+import javax.money.UnknownCurrencyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -61,15 +61,18 @@ public class TransFraudService {
             TerminalLocationResponse terminalResponse = (TerminalLocationResponse)allFutures.get(3).get();
 
             // check rules
-            IncomingTransactionInfo transInfo = getTransInfo(request, cardUsage, cardResponse, terminalResponse);
+            IncomingTransactionInfo transInfo = getTransInfo(request, cardUsage, cardResponse, terminalTrans, terminalResponse);
             response = fraudRulesHandler.checkIncomingTransaction(transInfo);
 
-        } catch (CompletionException e) {
-            if (e.getCause() instanceof TerminalException) {
-                response = fraudRulesHandler.handleInvalidTerminal(request.getThreatScore());
+        } catch (CompletionException ce) {
+            if (ce.getCause() instanceof TerminalException) {
+                response = fraudRulesHandler.handleInvalidTerminal();
             } else {
-                throw new FraudCheckException("Unable to verify the transaction", e.getCause());
+                throw new FraudCheckException("Unable to verify the transaction", ce.getCause());
             }
+        } catch (FraudCheckException fce) {
+            // fraudRulesHandler already managed the exception
+            throw fce;
         } catch (Exception e) {
             log.error("Unexpected error", e);
             throw new RuntimeException("Unexpected error", e);
@@ -85,7 +88,7 @@ public class TransFraudService {
         return response;
     }
 
-    private IncomingTransactionInfo getTransInfo(FraudCheckRequest request, Integer cardUsage, CardResponse card, TerminalLocationResponse terminal) {
+    private IncomingTransactionInfo getTransInfo(FraudCheckRequest request, Integer cardUsage, CardResponse card, Integer terminalTrans, TerminalLocationResponse terminal) {
         return new IncomingTransactionInfo(
                 request.getAmount(),
                 request.getCurrency(),
@@ -93,14 +96,17 @@ public class TransFraudService {
                 cardUsage,
                 card.getLastLocationLat(),
                 card.getLastLocationLong(),
+                terminalTrans,
                 terminal.getLatitude(),
                 terminal.getLongitude()
         );
     }
 
     private void checkCurrency(String currency) {
-        if (!EnumUtils.isValidEnum(CurrencyThreshold.class, currency)) {
-            throw new CurrencyException("Currency invalid/not supported");
+        try {
+            Monetary.getCurrency(currency);
+        } catch (UnknownCurrencyException e) {
+            throw new CurrencyException("Invalid currency ISO code", e);
         }
     }
 }

@@ -88,7 +88,7 @@ public class TransFraudServiceTest {
 
         when(dummyTerminalServiceCaller.getTerminalLocation(startsWith("T"))).thenReturn(future1);
         when(dummyTerminalServiceCaller.getTerminalLastTransactions(startsWith("T"), any())).thenReturn(future2);
-        when(fraudRulesHandler.handleInvalidTerminal(any())).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Test", 50));
+        when(fraudRulesHandler.handleInvalidTerminal()).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Test", 50));
 
         FraudCheckRequest request = getFraudCheckRequestForTest();
 

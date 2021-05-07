@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Created by pasqualericupero on 07/05/2021.
  */
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Currency invalid/not supported")
+@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Invalid currency ISO code")
 public class CurrencyException  extends RuntimeException {
 
     public CurrencyException(String message) {
