@@ -40,7 +40,9 @@ public class DummyTerminalServiceCallerTest {
     public void setUp() {
         dummyTerminalServiceCaller.transactionServiceUrl = "http://test.io";
 
-        when(restTemplate.exchange(contains("terminal"), any(HttpMethod.class), any(),
+        when(restTemplate.exchange(contains("transactions"), any(HttpMethod.class), any(),
+                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(145, HttpStatus.OK));
+        when(restTemplate.exchange(contains("last-location"), any(HttpMethod.class), any(),
                 ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(new TerminalLocationResponse(2.002, 1.001), HttpStatus.OK));
     }
 
@@ -73,6 +75,42 @@ public class DummyTerminalServiceCallerTest {
                 ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(HttpStatus.NOT_FOUND));
 
         CompletableFuture<TerminalLocationResponse> response = dummyTerminalServiceCaller.getTerminalLocation("test01");
+
+        try {
+            response.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test
+    public void testGetTerminalLastTransactions() throws Exception {
+        CompletableFuture<Integer> response = dummyTerminalServiceCaller.getTerminalLastTransactions("test01", 24);
+
+        assertNotNull(response.get());
+        assertEquals((Integer)145, response.get());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testGetTerminalLastTransactionsFailure() throws Throwable {
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
+                ArgumentMatchers.<Class<String>>any())).thenThrow(RuntimeException.class);
+
+        CompletableFuture<Integer> response = dummyTerminalServiceCaller.getTerminalLastTransactions("test01", 24);
+
+        try {
+            response.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test(expected = TerminalException.class)
+    public void testGetTerminalLastTransactionsNotFound() throws Throwable {
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
+                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(HttpStatus.NOT_FOUND));
+
+        CompletableFuture<Integer> response = dummyTerminalServiceCaller.getTerminalLastTransactions("test01", 24);
 
         try {
             response.get();

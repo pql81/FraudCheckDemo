@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.math.BigDecimal;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +41,7 @@ public class FraudDetectedServiceTest {
     @Test
     public void testSaveFraud() throws Exception {
         FraudCheckRequest checkReq = new FraudCheckRequest();
-        checkReq.setAmount(new BigDecimal(10.4));
+        checkReq.setAmount(10.4);
         checkReq.setCurrency("EUR");
         checkReq.setCardNumber("5555555555554444");
         checkReq.setTerminalId("test123");

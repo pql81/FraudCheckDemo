@@ -13,6 +13,8 @@ spring.jpa.open-in-view: false
 
 spring.security.user.password: test123
 
+server.error.include-message: always
+
 management.health:
   circuitbreakers.enabled: true
   circuitbreakerevents.enabled: true

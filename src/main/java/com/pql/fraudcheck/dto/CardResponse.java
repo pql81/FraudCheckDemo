@@ -9,5 +9,5 @@ import lombok.Data;
 public class CardResponse {
 
     private final Double lastLocationLat;
-    private final Double getLastLocationLong;
+    private final Double lastLocationLong;
 }

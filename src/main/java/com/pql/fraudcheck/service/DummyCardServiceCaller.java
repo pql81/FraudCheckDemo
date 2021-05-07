@@ -98,11 +98,11 @@ public class DummyCardServiceCaller {
         CompletableFuture<CardResponse> future = new CompletableFuture<>();
 
         try {
-        log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-        CardResponse response = restTemplate.exchange(
-                builder.buildAndExpand(params).toUriString(),
-                HttpMethod.GET, entity,
-                CardResponse.class).getBody();
+            log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
+            CardResponse response = restTemplate.exchange(
+                    builder.buildAndExpand(params).toUriString(),
+                    HttpMethod.GET, entity,
+                    CardResponse.class).getBody();
 
             future.complete(response);
         } catch (Exception e) {
