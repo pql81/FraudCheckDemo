@@ -30,17 +30,11 @@ public class FraudRulesHandler {
         log.info("Checking fraud against {} rules", fraudRuleMap.size());
 
         try {
-            List<FraudRuleScore> fraudScoreList = new ArrayList<>();
-            fraudRuleMap.entrySet().stream()
-                    .forEach(rule -> fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo)));
+            // fraud check in parallel between available rules (components in fraudRuleMap)
+            List<FraudRuleScore> fraudScoreList = checkFraudParallel(transInfo);
 
-            String messages = fraudScoreList.stream()
-                    .map(FraudRuleScore::getMessage)
-                    .filter(s -> s != null && !s.isEmpty())
-                    .collect(Collectors.joining(";"));
-
-            Integer fraudScore = fraudScoreList.stream()
-                    .mapToInt(FraudRuleScore::getScore).sum();
+            String messages = getMessage(fraudScoreList);
+            Integer fraudScore = getScore(fraudScoreList);
 
             if (fraudScore > 0) {
                 log.info("Total fraud score calculated::{}", fraudScore);
@@ -57,5 +51,25 @@ public class FraudRulesHandler {
 
     public FraudCheckResponse handleInvalidTerminal() {
         return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Invalid terminal", 100);
+    }
+
+    private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {
+        List<FraudRuleScore> fraudScoreList = new ArrayList<>();
+        fraudRuleMap.entrySet().parallelStream()
+                .forEach(rule -> fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo)));
+
+        return fraudScoreList;
+    }
+
+    private String getMessage(List<FraudRuleScore> fraudScoreList) {
+        return fraudScoreList.stream()
+                .map(FraudRuleScore::getMessage)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.joining(";"));
+    }
+
+    private Integer getScore(List<FraudRuleScore> fraudScoreList) {
+        return fraudScoreList.stream()
+                .mapToInt(FraudRuleScore::getScore).sum();
     }
 }

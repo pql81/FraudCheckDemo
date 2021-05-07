@@ -102,10 +102,10 @@ public class TransFraudService {
         // call to external services in parallel in order to reduce general call time
         List<CompletableFuture> allFutures = new ArrayList<>();
 
-        allFutures.add(dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
-        allFutures.add(dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
-        allFutures.add(dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
-        allFutures.add(dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
+        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
+        allFutures.add(1, dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
+        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
+        allFutures.add(3, dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
 
         CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
 
