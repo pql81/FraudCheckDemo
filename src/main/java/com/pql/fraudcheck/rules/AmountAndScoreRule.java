@@ -2,12 +2,12 @@ package com.pql.fraudcheck.rules;
 
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
+import com.pql.fraudcheck.exception.CorruptedDataException;
 import lombok.extern.log4j.Log4j2;
 import org.javamoney.moneta.FastMoney;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.convert.CurrencyConversion;
@@ -20,22 +20,19 @@ import javax.money.convert.MonetaryConversions;
 @Component("AMOUNT_SCORE")
 public class AmountAndScoreRule implements IFraudDetection {
 
-    @Value("${fraud.amount.threshold.value}")
-    private int threshold;
-    @Value("${fraud.amount.threshold.currency}")
-    private String thresholdCurrency;
-
     private CurrencyConversion conversionForCalculation;
     private FastMoney amountThreshold;
 
 
-    @PostConstruct
-    private void initCurrencyConverter() {
+    public AmountAndScoreRule(@Value("${fraud.amount.threshold.value}") int threshold,
+                              @Value("${fraud.amount.threshold.currency}") String thresholdCurrency) {
         this.conversionForCalculation = MonetaryConversions.getConversion(thresholdCurrency);
         this.amountThreshold = FastMoney.of(threshold, thresholdCurrency);
     }
 
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
+        checkForInvalidInput(transInfo);
+
         CurrencyUnit inputCurrency = Monetary.getCurrency(transInfo.getCurrency());
         FastMoney amount = FastMoney.of(transInfo.getAmount(), inputCurrency);
 
@@ -50,7 +47,7 @@ public class AmountAndScoreRule implements IFraudDetection {
         String message = null;
         if (inputAmountNormalized.isGreaterThan(applicableThreshold)) {
             message = "Transaction amount exceeds the upper limit for the terminal";
-            fraudScore=25;
+            fraudScore = calculateFraudScore(transInfo.getThreatScore());
             log.warn("{}::{}", message, inputAmountNormalized.toString());
         }
 
@@ -73,5 +70,17 @@ public class AmountAndScoreRule implements IFraudDetection {
         }
 
         return applicableThreshold;
+    }
+
+    private Integer calculateFraudScore(Integer threatScore) {
+        return threatScore > 50 ? 50 : 25;
+    }
+
+    private void checkForInvalidInput(IncomingTransactionInfo info) {
+        if (info.getThreatScore() < 0 || info.getAmount() < 0) {
+            // it shouldn't happen as input data is validated at controller level
+            log.warn("Data corrupted during fraud check process");
+            throw new CorruptedDataException("Corrupted data in input");
+        }
     }
 }
