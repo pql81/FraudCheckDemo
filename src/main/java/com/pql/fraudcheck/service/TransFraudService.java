@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by pasqualericupero on 05/05/2021.
@@ -42,26 +43,13 @@ public class TransFraudService {
         // if currency is invalid there is no need to proceed
         checkCurrency(request.getCurrency());
 
-        FraudCheckResponse response = null;
-
-        // call to external services in parallel in order to reduce general call time
-        List<CompletableFuture> allFutures = new ArrayList<>();
-
-        allFutures.add(dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
-        allFutures.add(dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
-        allFutures.add(dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
-        allFutures.add(dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
+        FraudCheckResponse response;
 
         try {
-            CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
-
-            Integer cardUsage = (Integer)allFutures.get(0).get();
-            CardResponse cardResponse = (CardResponse)allFutures.get(1).get();
-            Integer terminalTrans = (Integer)allFutures.get(2).get();
-            TerminalLocationResponse terminalResponse = (TerminalLocationResponse)allFutures.get(3).get();
+            // invoke external services in parallel and wait for them to complete
+            IncomingTransactionInfo transInfo = launchServiceRequests(request);
 
             // check rules
-            IncomingTransactionInfo transInfo = getTransInfo(request, cardUsage, cardResponse, terminalTrans, terminalResponse);
             response = fraudRulesHandler.checkIncomingTransaction(transInfo);
 
         } catch (CompletionException ce) {
@@ -108,5 +96,24 @@ public class TransFraudService {
         } catch (UnknownCurrencyException e) {
             throw new CurrencyException("Invalid currency ISO code", e);
         }
+    }
+
+    private IncomingTransactionInfo launchServiceRequests(FraudCheckRequest request) throws InterruptedException, ExecutionException {
+        // call to external services in parallel in order to reduce general call time
+        List<CompletableFuture> allFutures = new ArrayList<>();
+
+        allFutures.add(dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
+        allFutures.add(dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
+        allFutures.add(dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
+        allFutures.add(dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
+
+        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
+
+        Integer cardUsage = (Integer)allFutures.get(0).get();
+        CardResponse cardResponse = (CardResponse)allFutures.get(1).get();
+        Integer terminalTrans = (Integer)allFutures.get(2).get();
+        TerminalLocationResponse terminalResponse = (TerminalLocationResponse)allFutures.get(3).get();
+
+        return getTransInfo(request, cardUsage, cardResponse, terminalTrans, terminalResponse);
     }
 }

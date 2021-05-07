@@ -83,7 +83,7 @@ public class FraudRulesHandlerTest {
     }
 
     @Test
-    public void testhandleInvalidTerminal() throws Exception {
+    public void testHandleInvalidTerminal() throws Exception {
         FraudCheckResponse response = fraudRulesHandler.handleInvalidTerminal();
 
         assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());

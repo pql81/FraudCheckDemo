@@ -30,16 +30,16 @@ public class FraudRulesHandler {
         log.info("Checking fraud against {} rules", fraudRuleMap.size());
 
         try {
-            List<FraudRuleScore> frauScoreList = new ArrayList<>();
+            List<FraudRuleScore> fraudScoreList = new ArrayList<>();
             fraudRuleMap.entrySet().stream()
-                    .forEach(rule -> frauScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo)));
+                    .forEach(rule -> fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo)));
 
-            String messages = frauScoreList.stream()
+            String messages = fraudScoreList.stream()
                     .map(FraudRuleScore::getMessage)
                     .filter(s -> s != null && !s.isEmpty())
                     .collect(Collectors.joining(";"));
 
-            Integer fraudScore = frauScoreList.stream()
+            Integer fraudScore = fraudScoreList.stream()
                     .mapToInt(FraudRuleScore::getScore).sum();
 
             if (fraudScore > 0) {
