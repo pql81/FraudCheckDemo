@@ -4,6 +4,7 @@ import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 import com.pql.fraudcheck.exception.FraudCheckException;
+import com.pql.fraudcheck.util.MDCStreamHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
@@ -55,8 +56,12 @@ public class FraudRulesHandler {
 
     private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {
         List<FraudRuleScore> fraudScoreList = new ArrayList<>();
+        MDCStreamHelper mdc = MDCStreamHelper.getCurrentMdc();
         fraudRuleMap.entrySet().parallelStream()
-                .forEach(rule -> fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo)));
+                .forEach(rule -> {
+                        mdc.setMdc();
+                        fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo));
+                });
 
         return fraudScoreList;
     }
