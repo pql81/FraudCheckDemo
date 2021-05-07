@@ -37,7 +37,7 @@ public class FraudCheckControllerTest {
         mockMvc.perform(post("/fraud-check")
                 .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
     }
 
     @Test

@@ -29,6 +29,6 @@ public class FraudCheckController {
 
         FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
