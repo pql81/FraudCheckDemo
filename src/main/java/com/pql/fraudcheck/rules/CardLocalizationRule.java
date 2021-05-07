@@ -20,9 +20,9 @@ public class CardLocalizationRule implements IFraudDetection {
         String message = null;
 
         // mocked service - just place some trivial logic to eventually return a value different from 0
-        if (Math.abs(transInfo.getTerminalLat() - transInfo.getCardLastLocationLat()) > 10
-            || Math.abs(transInfo.getTerminalLong() - transInfo.getCardLastLocationLong()) > 10) {
-            fraudScore = 40;
+        if (Math.abs(transInfo.getTerminalLat() - transInfo.getCardLastLocationLat()) > 0.01
+            || Math.abs(transInfo.getTerminalLong() - transInfo.getCardLastLocationLong()) > 0.01) {
+            fraudScore = 25;
         }
 
         if (fraudScore > 0) {
