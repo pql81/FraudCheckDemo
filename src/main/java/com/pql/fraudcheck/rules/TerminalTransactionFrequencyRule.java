@@ -6,32 +6,30 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by pasqualericupero on 06/05/2021.
+ * Created by pasqualericupero on 07/05/2021.
  */
 @Log4j2
-@Component("CARD_FREQUENCY")
-public class CardTransactionFrequencyRule implements IFraudDetection {
+@Component("TRANS_FREQUENCY")
+public class TerminalTransactionFrequencyRule implements IFraudDetection {
 
     @Override
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
-        Integer transFrequency = transInfo.getRecentCardTransactionNumber();
-        log.info("Processing card recent transaction number::{}", transFrequency);
+        Integer transFrequency = transInfo.getRecentTerminalTransactionNumber();
+        log.info("Processing terminal recent transaction number::{}", transFrequency);
 
         Integer fraudScore;
         String message = null;
 
-        if (transFrequency <= 25) {
+        if (transFrequency <= 250) {
             fraudScore = 0;
-        } else if (transFrequency <= 50) {
-            fraudScore = 15;
-        } else if (transFrequency <= 100) {
-            fraudScore = 50;
+        } else if (transFrequency <= 750) {
+            fraudScore = 30;
         } else {
-            fraudScore = 80;
+            fraudScore = 70;
         }
 
         if (fraudScore > 0) {
-            message = "Card transaction frequency suspicious";
+            message = "Terminal transaction frequency suspicious";
             log.warn("{}::{}", message, transFrequency);
         }
 

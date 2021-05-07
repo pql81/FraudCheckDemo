@@ -14,6 +14,7 @@ public class IncomingTransactionInfo {
     private final Integer recentCardTransactionNumber;
     private final Double cardLastLocationLat;
     private final Double cardLastLocationLong;
+    private final Integer recentTerminalTransactionNumber;
     private final Double terminalLat;
     private final Double terminalLong;
 }
