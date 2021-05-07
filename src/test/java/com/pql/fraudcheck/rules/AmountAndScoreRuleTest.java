@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AmountAndScoreRuleTest {
 
-    AmountAndScoreRule amountAndScoreRule;
+    IFraudDetection amountAndScoreRule;
 
 
     @Before
