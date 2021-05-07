@@ -79,7 +79,15 @@ public class DummyTerminalServiceCaller {
         if (!terminalId.startsWith("T")) {
             future.completeExceptionally(new TerminalException("Not Found"));
         } else {
-            Integer transNum = 154;
+            Integer transNum;
+            // for test purpose
+            if (terminalId.endsWith("02")) {
+                transNum = 697;
+            } else if (terminalId.endsWith("03")) {
+                transNum = 980;
+            } else {
+                transNum = 154;
+            }
             future.complete(transNum);
         }
 
