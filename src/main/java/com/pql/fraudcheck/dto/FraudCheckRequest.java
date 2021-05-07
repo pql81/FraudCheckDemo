@@ -15,7 +15,8 @@ public class FraudCheckRequest {
     private Double amount;
 
     @NotBlank(message = "Cannot be empty")
-    private String currency;
+    @Pattern(regexp = "^[A-Z]{3}", message="Must be ISO code")
+    private String currency; // string type as it is decoupled from the util enum
 
     @NotBlank(message = "Cannot be empty")
     private String terminalId;
