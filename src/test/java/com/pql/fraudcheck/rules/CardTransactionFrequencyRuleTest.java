@@ -67,7 +67,7 @@ public class CardTransactionFrequencyRuleTest {
     }
 
     @Test(expected = CorruptedDataException.class)
-    public void testCheckFraudScoreNegativeThreatScore() throws Exception {
+    public void testCheckFraudScoreNegativeTransNumber() throws Exception {
         getFraudScore(-5);
     }
 
