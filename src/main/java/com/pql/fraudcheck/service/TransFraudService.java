@@ -1,14 +1,21 @@
 package com.pql.fraudcheck.service;
 
-import com.pql.fraudcheck.dto.FraudCheckRequest;
-import com.pql.fraudcheck.dto.FraudCheckResponse;
+import com.pql.fraudcheck.dto.*;
+import com.pql.fraudcheck.exception.CurrencyException;
+import com.pql.fraudcheck.exception.FraudCheckException;
+import com.pql.fraudcheck.exception.TerminalException;
+import com.pql.fraudcheck.rules.FraudRulesHandler;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.money.Monetary;
+import javax.money.UnknownCurrencyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by pasqualericupero on 05/05/2021.
@@ -18,30 +25,46 @@ import java.util.concurrent.CompletableFuture;
 public class TransFraudService {
 
     @Autowired
-    DummyCardServiceCaller dummyCardServiceCaller;
+    private DummyCardServiceCaller dummyCardServiceCaller;
 
     @Autowired
-    DummyTerminalServiceCaller dummyTerminalServiceCaller;
+    private DummyTerminalServiceCaller dummyTerminalServiceCaller;
 
     @Autowired
-    FraudDetectedService fraudDetectedService;
+    private FraudRulesHandler fraudRulesHandler;
+
+    @Autowired
+    private FraudDetectedService fraudDetectedService;
 
 
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
         log.info("Started fraud check for cardNumber::* * * {} and terminalId::{}", request.getCardNumber().substring(12), request.getTerminalId());
 
-        // call to external services in parallel in order to reduce general call time
-        List<CompletableFuture> allFutures = new ArrayList<>();
+        // if currency is invalid there is no need to proceed
+        checkCurrency(request.getCurrency());
 
-        allFutures.add(dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
-        allFutures.add(dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
-        allFutures.add(dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
+        FraudCheckResponse response;
 
-        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
+        try {
+            // invoke external services in parallel and wait for them to complete
+            IncomingTransactionInfo transInfo = launchServiceRequests(request);
 
-        // check rules
+            // check rules
+            response = fraudRulesHandler.checkIncomingTransaction(transInfo);
 
-        FraudCheckResponse response = new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, 0);
+        } catch (CompletionException ce) {
+            if (ce.getCause() instanceof TerminalException) {
+                response = fraudRulesHandler.handleInvalidTerminal();
+            } else {
+                throw new FraudCheckException("Unable to verify the transaction", ce.getCause());
+            }
+        } catch (FraudCheckException fce) {
+            // fraudRulesHandler already managed the exception
+            throw fce;
+        } catch (Exception e) {
+            log.error("Unexpected error", e);
+            throw new RuntimeException("Unexpected error", e);
+        }
 
         // if fraud is detected then save it to the DB
         if (response.getRejectionStatus() == FraudCheckResponse.RejStatus.DENIED) {
@@ -51,5 +74,46 @@ public class TransFraudService {
         log.info("Fraud check for cardNumber::{} and terminalId::{} complete", request.getCardNumber().substring(12), request.getTerminalId());
 
         return response;
+    }
+
+    private IncomingTransactionInfo getTransInfo(FraudCheckRequest request, Integer cardUsage, CardResponse card, Integer terminalTrans, TerminalLocationResponse terminal) {
+        return new IncomingTransactionInfo(
+                request.getAmount(),
+                request.getCurrency(),
+                request.getThreatScore(),
+                cardUsage,
+                card.getLastLocationLat(),
+                card.getLastLocationLong(),
+                terminalTrans,
+                terminal.getLatitude(),
+                terminal.getLongitude()
+        );
+    }
+
+    private void checkCurrency(String currency) {
+        try {
+            Monetary.getCurrency(currency);
+        } catch (UnknownCurrencyException e) {
+            throw new CurrencyException("Invalid currency ISO code", e);
+        }
+    }
+
+    private IncomingTransactionInfo launchServiceRequests(FraudCheckRequest request) throws InterruptedException, ExecutionException {
+        // call to external services in parallel in order to reduce general call time
+        List<CompletableFuture> allFutures = new ArrayList<>();
+
+        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
+        allFutures.add(1, dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
+        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
+        allFutures.add(3, dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
+
+        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
+
+        Integer cardUsage = (Integer)allFutures.get(0).get();
+        CardResponse cardResponse = (CardResponse)allFutures.get(1).get();
+        Integer terminalTrans = (Integer)allFutures.get(2).get();
+        TerminalLocationResponse terminalResponse = (TerminalLocationResponse)allFutures.get(3).get();
+
+        return getTransInfo(request, cardUsage, cardResponse, terminalTrans, terminalResponse);
     }
 }

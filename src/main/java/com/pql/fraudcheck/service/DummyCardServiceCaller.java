@@ -73,7 +73,16 @@ public class DummyCardServiceCaller {
         // in a real scenario this method should handle a fallback properly
         log.warn("CardService.getCardUsage() fallback called");
 
-        Integer transNum = 15;
+        Integer transNum;
+
+        // for test purpose
+        if (cardNumber.endsWith("31")) {
+            transNum = 30;
+        } else if (cardNumber.endsWith("32")) {
+            transNum = 80;
+        } else {
+            transNum = 15;
+        }
 
         return CompletableFuture.completedFuture(transNum);
     }
@@ -98,11 +107,11 @@ public class DummyCardServiceCaller {
         CompletableFuture<CardResponse> future = new CompletableFuture<>();
 
         try {
-        log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-        CardResponse response = restTemplate.exchange(
-                builder.buildAndExpand(params).toUriString(),
-                HttpMethod.GET, entity,
-                CardResponse.class).getBody();
+            log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
+            CardResponse response = restTemplate.exchange(
+                    builder.buildAndExpand(params).toUriString(),
+                    HttpMethod.GET, entity,
+                    CardResponse.class).getBody();
 
             future.complete(response);
         } catch (Exception e) {
@@ -117,7 +126,7 @@ public class DummyCardServiceCaller {
         // in a real scenario this method should handle a fallback properly
         log.warn("CardService.getCardLastLocation() fallback called");
 
-        CardResponse response = new CardResponse(1232.111, 230.333);
+        CardResponse response = new CardResponse(-1.276, 2.315);
 
         return CompletableFuture.completedFuture(response);
     }

@@ -3,7 +3,6 @@ package com.pql.fraudcheck.dto;
 import lombok.Data;
 
 import javax.validation.constraints.*;
-import java.math.BigDecimal;
 
 /**
  * Created by pasqualericupero on 05/05/2021.
@@ -13,10 +12,11 @@ public class FraudCheckRequest {
 
     @NotNull(message = "Cannot be empty")
     @DecimalMin(value = "0", message = "Cannot be negative")
-    private BigDecimal amount;
+    private Double amount;
 
     @NotBlank(message = "Cannot be empty")
-    private String currency;
+    @Pattern(regexp = "^[A-Z]{3}", message="Must be ISO code")
+    private String currency; // string type as it is decoupled from the util enum
 
     @NotBlank(message = "Cannot be empty")
     private String terminalId;

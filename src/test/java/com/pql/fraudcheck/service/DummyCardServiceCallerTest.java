@@ -72,7 +72,7 @@ public class DummyCardServiceCallerTest {
 
         assertNotNull(response.get());
         assertEquals((Double)1232.111, response.get().getLastLocationLat());
-        assertEquals((Double)230.333, response.get().getGetLastLocationLong());
+        assertEquals((Double)230.333, response.get().getLastLocationLong());
     }
 
     @Test(expected = RuntimeException.class)

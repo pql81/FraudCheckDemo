@@ -33,6 +33,6 @@ public class FraudDetectedService {
 
         fraud = fraudDetectedRepository.save(fraud);
 
-        log.info("Detected fraud saved with id::{}", fraud.getId());
+        log.info("Detected fraud saved to DB with id::{}", fraud.getId());
     }
 }
