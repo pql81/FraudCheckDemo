@@ -41,12 +41,6 @@ public class FraudDetectedService {
         fraud.setRejectionMessage(response.getRejectionMessage());
         fraud.setFraudScore(response.getFraudScore());
 
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-
-        }
-
         return fraud;
     }
 }
