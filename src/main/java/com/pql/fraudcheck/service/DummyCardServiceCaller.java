@@ -126,7 +126,7 @@ public class DummyCardServiceCaller {
         // in a real scenario this method should handle a fallback properly
         log.warn("CardService.getCardLastLocation() fallback called");
 
-        CardResponse response = new CardResponse(1232.111, 230.333);
+        CardResponse response = new CardResponse(-1.276, 2.315);
 
         return CompletableFuture.completedFuture(response);
     }

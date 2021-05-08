@@ -28,7 +28,7 @@ public class TerminalTransactionFrequencyAndScoreRule implements IFraudDetection
         Integer fraudScore = 0;
         String message = null;
 
-        if (threatScore < 15 && transFrequency < 200) {
+        if (threatScore < 15 && transFrequency < 500) {
             fraudScore = 0;
         } else if (threatScore < 25 && transFrequency < 300) {
             fraudScore = 0;
