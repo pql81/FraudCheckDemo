@@ -16,6 +16,26 @@ $ git checkout master
 $ mvn spring-boot:run
 ```
 
+#### Running the application with MTLS
+
+In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project
+
+```shell
+$ git clone https://github.com/pql81/FraudCheckDemo.git
+$ cd FraudCheckDemo
+$ git checkout master
+$ mvn spring-boot:run -Dspring-boot.run.profiles=mtls
+```
+
+Using Insomnia client is possible to load client cert and key and test the service. Please uncheck 'Validate Certificates' in settings as the provided certificate is self-signed.
+
+Alternatively curl can be used to send a request:
+
+```shell
+$ cd FraudCheckDemo/src/main/resources/keystore/client
+$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"5555444455554444\"}" --cert ./client/client.cer --key ./client/client_key.pem --insecure
+```
+
 #### OpenAPI documetation and UI test
 
 OpenAPI description can be found at http://localhost:8080/v3/api-docs/
