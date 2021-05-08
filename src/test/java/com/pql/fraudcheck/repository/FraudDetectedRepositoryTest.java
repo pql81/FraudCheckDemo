@@ -28,6 +28,7 @@ public class FraudDetectedRepositoryTest {
     @Test
     public void testSaveAndFindDetectedFraud() {
         FraudDetected fraud = new FraudDetected();
+        fraud.setRequestId("TEST-REQUEST-012345");
         fraud.setAmount(10.5);
         fraud.setCurrency("EUR");
         fraud.setLastCardDigits("0000");

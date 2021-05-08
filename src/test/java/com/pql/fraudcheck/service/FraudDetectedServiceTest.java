@@ -4,6 +4,7 @@ import com.pql.fraudcheck.domain.FraudDetected;
 import com.pql.fraudcheck.dto.FraudCheckRequest;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.repository.FraudDetectedRepository;
+import org.jboss.logging.MDC;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +42,34 @@ public class FraudDetectedServiceTest {
 
     @Test
     public void testSaveFraud() throws Exception {
+        FraudCheckRequest checkReq = getFraudCheckRequestForTest();
+        FraudCheckResponse checkResp = getFraudCheckResponseForTest();
+
+        fraudDetectedService.saveFraud(checkReq, checkResp);
+
+        Mockito.verify(fraudDetectedRepository, Mockito.times(1)).save(any());
+    }
+
+    @Test
+    public void testCreateFraudDetected() throws Exception {
+        MDC.put("requestId", "MY-TEST"); // this is done in LogFilter
+
+        FraudCheckRequest checkReq = getFraudCheckRequestForTest();
+        FraudCheckResponse checkResp = getFraudCheckResponseForTest();
+
+        FraudDetected result = fraudDetectedService.createFraudDetected(checkReq, checkResp);
+
+        assertEquals("MY-TEST", result.getRequestId());
+        assertEquals((Double)10.4, result.getAmount());
+        assertEquals("EUR", result.getCurrency());
+        assertEquals("4444", result.getLastCardDigits());
+        assertEquals("test123", result.getTerminalId());
+        assertEquals(25, result.getThreatScore().intValue());
+        assertEquals(30, result.getFraudScore().intValue());
+        assertEquals("test1;test2", result.getRejectionMessage());
+    }
+
+    private FraudCheckRequest getFraudCheckRequestForTest() {
         FraudCheckRequest checkReq = new FraudCheckRequest();
         checkReq.setAmount(10.4);
         checkReq.setCurrency("EUR");
@@ -47,10 +77,10 @@ public class FraudDetectedServiceTest {
         checkReq.setTerminalId("test123");
         checkReq.setThreatScore(25);
 
-        FraudCheckResponse checkResp = new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, 0);
+        return checkReq;
+    }
 
-        fraudDetectedService.saveFraud(checkReq, checkResp);
-
-        Mockito.verify(fraudDetectedRepository, Mockito.times(1)).save(any());
+    private FraudCheckResponse getFraudCheckResponseForTest() {
+        return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "test1;test2", 30);
     }
 }
