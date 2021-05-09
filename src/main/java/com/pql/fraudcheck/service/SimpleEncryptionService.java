@@ -29,7 +29,7 @@ public class SimpleEncryptionService {
         try {
             return encryptor.encrypt(plainText);
         } catch (EncryptionOperationNotPossibleException e) {
-            throw new CardPanException("Could not decrypt card PAN", e);
+            throw new CardPanException("Could not encrypt card PAN", e);
         }
     }
 
@@ -37,7 +37,7 @@ public class SimpleEncryptionService {
         try {
             return encryptor.decrypt(encryptedText);
         } catch (EncryptionOperationNotPossibleException e) {
-            throw new CardPanException("Could not encrypt card PAN", e);
+            throw new CardPanException("Could not decrypt card PAN", e);
         }
     }
 }

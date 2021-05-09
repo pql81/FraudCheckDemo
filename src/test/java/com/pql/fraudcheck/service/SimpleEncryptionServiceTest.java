@@ -7,6 +7,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 
+import static org.junit.Assert.*;
+
 /**
  * Created by pasqualericupero on 09/05/2021.
  */
@@ -30,7 +32,11 @@ public class SimpleEncryptionServiceTest {
 
         System.out.println("Printing encrypted cards:");
         Arrays.stream(cardArray)
-                .forEach(card -> System.out.println("[" + card + "]" + "-> " + encryptionService.encrypt(card)));
+                .forEach(card -> {
+                    String encrypted = encryptionService.encrypt(card);
+                    assertEquals(card, encryptionService.decrypt(encrypted));
+                    System.out.println("[" + card + "]" + "-> " + encrypted);
+                });
     }
 
     @Test
@@ -39,8 +45,10 @@ public class SimpleEncryptionServiceTest {
                               "5JKaDwkzNodSV4vkE3YCFit806VQPuyfIqX3gEK2vUk=", "URogBH4GeglmHnvzyXmFqSUcsmI52u6NSCjrcVHI/mc=",
                               "bGmBrsbyL8KKSthbV2hwVMm4cecSSPiH", "5hxK9dvIt9Bk8rpOV5B5NA/wOCkHZs1P"};
 
-        System.out.println("Printing decrypted cards:");
         Arrays.stream(cardArray)
-                .forEach(card -> System.out.println(encryptionService.decrypt(card)));
+                .forEach(card -> {
+                    String plain = encryptionService.decrypt(card);
+                    assertNotEquals(card, plain);
+                });
     }
 }

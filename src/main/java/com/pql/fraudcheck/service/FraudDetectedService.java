@@ -4,6 +4,7 @@ import com.pql.fraudcheck.domain.FraudDetected;
 import com.pql.fraudcheck.dto.FraudCheckRequest;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.repository.FraudDetectedRepository;
+import com.pql.fraudcheck.util.CardUtil;
 import lombok.extern.log4j.Log4j2;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class FraudDetectedService {
         fraud.setCurrency(request.getCurrency());
         fraud.setTerminalId(request.getTerminalId());
         fraud.setThreatScore(request.getThreatScore());
-        fraud.setLastCardDigits(request.getCardNumber().substring(12));
+        fraud.setLastCardDigits(CardUtil.getMaskedPan(request.getCardNumber()));
         fraud.setRejectionMessage(response.getRejectionMessage());
         fraud.setFraudScore(response.getFraudScore());
 
