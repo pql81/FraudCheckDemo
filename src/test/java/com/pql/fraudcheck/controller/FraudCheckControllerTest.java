@@ -38,10 +38,10 @@ public class FraudCheckControllerTest {
     }
 
     @Test
-    public void testPostBadInvalidCard() throws Exception {
+    public void testPostBadCard() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"555545555443\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("cardNumber"));
