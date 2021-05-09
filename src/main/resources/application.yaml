@@ -35,6 +35,9 @@ terminal.service.url: http://localhost:8080/mock
 fraud.amount.threshold.value: 1000
 fraud.amount.threshold.currency: USD
 
+encryption.service.secret: decidelater
+encryption.service.algorithm: PBEWithMD5AndTripleDES
+
 resilience4j.retry:
   configs:
     default:

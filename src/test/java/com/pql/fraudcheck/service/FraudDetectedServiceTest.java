@@ -35,7 +35,7 @@ public class FraudDetectedServiceTest {
     public void setUp() {
         FraudDetected fraudToSave =new FraudDetected();
         fraudToSave.setId(123L);
-        fraudToSave.setLastCardDigits("4444");
+        fraudToSave.setMaskedCardNumber("5***********4444");
         fraudToSave.setTerminalId("test123");
 
         when(fraudDetectedRepository.save(any())).thenReturn(fraudToSave);
@@ -68,7 +68,7 @@ public class FraudDetectedServiceTest {
         assertEquals("MY-TEST", result.getRequestId());
         assertEquals((Double)10.4, result.getAmount());
         assertEquals("EUR", result.getCurrency());
-        assertEquals("4444", result.getLastCardDigits());
+        assertEquals("5***********4444", result.getMaskedCardNumber());
         assertEquals("test123", result.getTerminalId());
         assertEquals(25, result.getThreatScore().intValue());
         assertEquals(30, result.getFraudScore().intValue());

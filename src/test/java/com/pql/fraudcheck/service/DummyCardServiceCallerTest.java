@@ -30,6 +30,9 @@ public class DummyCardServiceCallerTest {
     @Mock
     private ServiceClientWithRetry serviceClientWithRetry;
 
+    @Mock
+    private SimpleEncryptionService simpleEncryptionService;
+
     @InjectMocks
     DummyCardServiceCaller dummyCardServiceCaller;
 
