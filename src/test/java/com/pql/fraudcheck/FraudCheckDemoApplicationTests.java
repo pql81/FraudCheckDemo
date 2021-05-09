@@ -78,6 +78,24 @@ public class FraudCheckDemoApplicationTests {
     }
 
     @Test
+    public void testFraudCheckDeniedCardNumberTooShort() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"123456789012\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testFraudCheckDeniedCardNumberTooLong() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"USD\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"98765432109876543\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testFraudCheckDeniedCurrency() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
