@@ -39,8 +39,9 @@ public class DummyCardServiceCaller {
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
         // GET <cardServiceUrl>/card/{number}/transactions?lastHours=lastHours
 
-        String url = cardServiceUrl+"/card/{number}/transactions";
+        log.info("CardService.getCardUsage() called");
 
+        String url = cardServiceUrl+"/card/{number}/transactions";
 
         Map<String, String> params = new HashMap<>();
         params.put("number", simpleEncryptionService.encrypt(cardNumber));
@@ -51,8 +52,6 @@ public class DummyCardServiceCaller {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
         try {
-            log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-
             Integer response = serviceClientWithRetry.sendGetRequest(builder.buildAndExpand(params).toUriString(), Integer.class);
             future.complete(response);
 
@@ -64,7 +63,7 @@ public class DummyCardServiceCaller {
                 future.completeExceptionally(e);
             }
         } catch (Exception e) {
-            log.warn("Call to service failed");
+            log.warn("CardService.getCardUsage() failed");
             future.completeExceptionally(e);
         }
 
@@ -105,6 +104,8 @@ public class DummyCardServiceCaller {
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
         // GET <url:port>/card/{number}/last-location
 
+        log.info("CardService.getCardLastLocation() called");
+
         String url = cardServiceUrl+"/card/{number}/last-location";
 
         Map<String, String> params = new HashMap<>();
@@ -115,8 +116,6 @@ public class DummyCardServiceCaller {
         CompletableFuture<CardResponse> future = new CompletableFuture<>();
 
         try {
-            log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-
             CardResponse response = serviceClientWithRetry.sendGetRequest(builder.buildAndExpand(params).toUriString(), CardResponse.class);
             future.complete(response);
 
@@ -128,7 +127,7 @@ public class DummyCardServiceCaller {
                 future.completeExceptionally(e);
             }
         } catch (Exception e) {
-            log.warn("Call to service failed");
+            log.warn("CardService.getCardLastLocation() failed");
             future.completeExceptionally(e);
         }
 

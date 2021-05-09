@@ -2,6 +2,7 @@ package com.pql.fraudcheck.service;
 
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -34,6 +35,10 @@ public class ServiceClientWithRetry {
     }
 
     private <T> T sendRequest(HttpMethod httpMethod, String path, HttpHeaders headers, Object request, Class<T> responseClass) {
+        String srvId = RandomStringUtils.random(8, "0123456789abcdef"); // useful to trace the single http request
+
+        log.info("[{}] Requesting::{} {}", srvId, httpMethod.toString(), path);
+
         HttpEntity<?> entity = new HttpEntity<>(request, headers);
 
         try {
@@ -46,13 +51,13 @@ public class ServiceClientWithRetry {
 
             Instant finish = Instant.now();
 
-            log.info("Service call took {}ms", Duration.between(start, finish).toMillis());
+            log.info("[{}] Service response took {}ms", srvId, Duration.between(start, finish).toMillis());
 
             return response.getBody();
 
         } catch(Exception e) {
             // not logging the stacktrace here because of the retry - could be too verbose
-            log.debug("Attempt to call service failed");
+            log.warn("[{}] Request failed", srvId);
             throw e;
         }
     }

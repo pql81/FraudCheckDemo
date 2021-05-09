@@ -15,12 +15,15 @@ import static org.junit.Assert.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleEncryptionServiceTest {
 
+    private String password = "decidelater";
+    private String algorithm = "PBEWithMD5AndTripleDES";
+
     SimpleEncryptionService encryptionService;
 
 
     @Before
     public void setUp() {
-        encryptionService = new SimpleEncryptionService("decidelater", "PBEWithMD5AndTripleDES");
+        encryptionService = new SimpleEncryptionService(password, algorithm);
     }
 
     @Test

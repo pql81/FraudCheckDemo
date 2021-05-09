@@ -23,3 +23,6 @@ terminal.service.url: http://terminal-service:9091
 
 fraud.amount.threshold.value: 1000
 fraud.amount.threshold.currency: USD
+
+encryption.service.secret: decidelater
+encryption.service.algorithm: PBEWithMD5AndTripleDES

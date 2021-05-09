@@ -37,6 +37,8 @@ public class DummyTerminalServiceCaller {
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
         // GET <terminalServiceUrl>/terminal/{terminalId}/transactions
 
+        log.info("TerminalService.getTerminalLastTransactions() called");
+
         String url = terminalServiceUrl+"/terminal/{terminalId}/transactions";
 
         Map<String, String> params = new HashMap<>();
@@ -48,7 +50,6 @@ public class DummyTerminalServiceCaller {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
         try {
-            log.info("Calling service::{}", builder.build().toUriString());
             Integer response = serviceClientWithRetry.sendGetRequest(
                     builder.buildAndExpand(params).toUriString(),
                     Integer.class);
@@ -62,7 +63,7 @@ public class DummyTerminalServiceCaller {
                 future.completeExceptionally(e);
             }
         } catch (Exception e) {
-            log.warn("Call to service failed");
+            log.warn("TerminalService.getTerminalLastTransactions() failed");
             future.completeExceptionally(e);
         }
 
@@ -101,6 +102,8 @@ public class DummyTerminalServiceCaller {
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
         // GET <terminalServiceUrl>/terminal/{terminalId}/last-location
 
+        log.info("TerminalService.getTerminalLocation() called");
+
         String url = terminalServiceUrl+"/terminal/{terminalId}/last-location";
 
         Map<String, String> params = new HashMap<>();
@@ -111,7 +114,6 @@ public class DummyTerminalServiceCaller {
         CompletableFuture<TerminalLocationResponse> future = new CompletableFuture<>();
 
         try {
-            log.info("Calling service::{}", builder.build().toUriString());
             TerminalLocationResponse response = serviceClientWithRetry.sendGetRequest(
                     builder.buildAndExpand(params).toUriString(),
                     TerminalLocationResponse.class);
@@ -125,7 +127,7 @@ public class DummyTerminalServiceCaller {
                 future.completeExceptionally(e);
             }
         } catch (Exception e) {
-            log.warn("Call to service failed");
+            log.warn("TerminalService.getTerminalLocation() failed");
             future.completeExceptionally(e);
         }
 
