@@ -28,6 +28,9 @@ public class DummyCardServiceCaller {
     @Autowired
     private ServiceClientWithRetry serviceClientWithRetry;
 
+    @Autowired
+    private SimpleEncryptionService simpleEncryptionService;
+
 
     @Async
     @CircuitBreaker(name="cardService", fallbackMethod="getCardUsageFallback")
@@ -40,7 +43,7 @@ public class DummyCardServiceCaller {
 
 
         Map<String, String> params = new HashMap<>();
-        params.put("number", cardNumber);
+        params.put("number", simpleEncryptionService.encrypt(cardNumber));
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("lastHours", lastHours);
@@ -105,7 +108,7 @@ public class DummyCardServiceCaller {
         String url = cardServiceUrl+"/card/{number}/last-location";
 
         Map<String, String> params = new HashMap<>();
-        params.put("number", cardNumber);
+        params.put("number", simpleEncryptionService.encrypt(cardNumber));
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
 
