@@ -27,7 +27,7 @@ public class FraudCheckRequest {
     private Integer threatScore;
 
     @NotNull(message = "Cannot be empty")
-    @Size(min=15, max=16, message="Must be 15 or 16 digits")
+    @Pattern(regexp = "^[0-9]{13,16}", message="Must be between 13 and 16 digits")
     private String cardNumber;
 
     @Override
