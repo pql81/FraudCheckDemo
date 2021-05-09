@@ -1,0 +1,25 @@
+spring.application.name: fraud-check
+
+spring.datasource:
+  url: jdbc:h2:mem:transdb
+  driverClassName: org.h2.Driver
+  username: sa
+  password:
+
+spring.jpa:
+  database-platform: org.hibernate.dialect.H2Dialect
+  hibernate.ddl-auto: update
+
+server.error.include-message: always
+
+thread.pool.core.size: 10
+thread.pool.max.size: 50
+
+rest.template.connection.timeout.millis: 100
+rest.template.read.timeout.millis: 100
+
+card.service.url: https://card-service:9090
+terminal.service.url: http://terminal-service:9091
+
+fraud.amount.threshold.value: 1000
+fraud.amount.threshold.currency: USD

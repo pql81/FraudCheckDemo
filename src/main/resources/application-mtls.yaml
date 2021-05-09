@@ -11,3 +11,15 @@ server:
     trust-store: classpath:keystore/truststore.jks
     trust-store-password: secret
     client-auth: need
+
+client:
+  ssl:
+    one-way-authentication-enabled: false
+    two-way-authentication-enabled: true
+    key-store: classpath:keystore/client/keystore.jks
+    key-password: secret
+    key-store-password: secret
+    trust-store: classpath:keystore/client/truststore.jks
+    trust-store-password: secret
+
+terminal.service.url: https://localhost:8443/mock

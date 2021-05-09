@@ -1,3 +1,5 @@
+spring.application.name: fraud-check
+
 spring.datasource:
   url: jdbc:h2:mem:transdb
   driverClassName: org.h2.Driver
@@ -28,21 +30,13 @@ rest.template.connection.timeout.millis: 100
 rest.template.read.timeout.millis: 100
 
 card.service.url: https://card-service:9090
-terminal.service.url: https://transaction-service:9091
+terminal.service.url: http://localhost:8080/mock
 
 fraud.amount.threshold.value: 1000
 fraud.amount.threshold.currency: USD
 
 encryption.service.secret: decidelater
 encryption.service.algorithm: PBEWithMD5AndTripleDES
-
-#server.ssl:
-#  enabled: true
-#  key-store-type: PKCS12
-#  key-store: classpath:keystore/keystore.p12
-#  key-store-password: changeit
-#  protocol: TLS
-#  enabled-protocols: TLSv1.2
 
 resilience4j.retry:
   configs:
