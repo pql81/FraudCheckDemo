@@ -27,16 +27,21 @@ public class LogFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)servletRequest;
 
-        // try to retrieve the transaction id or request id from header - this is a demo so we wont't get any value here
-        String reqId = request.getHeader(REQUEST_ID_HEADER);
+        try {
+            // try to retrieve the transaction id or request id from header - this is a demo so we wont't get any value here
+            String reqId = request.getHeader(REQUEST_ID_HEADER);
 
-        // this is likely to happen!
-        if (reqId == null) {
-            reqId = UUID.randomUUID().toString();
+            // this is likely to happen!
+            if (reqId == null) {
+                reqId = UUID.randomUUID().toString();
+            }
+
+            MDC.put(REQUEST_ID_MDC, reqId);
+
+            filterChain.doFilter(servletRequest, servletResponse);
+
+        } finally {
+            MDC.clear();
         }
-
-        MDC.put(REQUEST_ID_MDC, reqId);
-
-        filterChain.doFilter(servletRequest, servletResponse);
     }
 }
