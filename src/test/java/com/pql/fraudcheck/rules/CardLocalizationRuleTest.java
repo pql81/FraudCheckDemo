@@ -38,7 +38,15 @@ public class CardLocalizationRuleTest {
         assertNotNull(response.getMessage());
     }
 
-    private FraudRuleScore getFraudScore(double cardLat, double cardLong, double terminalLat, double terminalLong) {
+    @Test
+    public void testCheckFraudCardLocationNotAvailable() throws Exception {
+        FraudRuleScore response = getFraudScore(null, null, -1.423, 2.067);
+
+        assertEquals(0, response.getScore().intValue());
+        assertNull(response.getMessage());
+    }
+
+    private FraudRuleScore getFraudScore(Double cardLat, Double cardLong, Double terminalLat, Double terminalLong) {
         IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 0, 19, cardLat, cardLong, 78, terminalLat, terminalLong);
         return cardLocalizationRule.checkFraud(transInfo);
     }

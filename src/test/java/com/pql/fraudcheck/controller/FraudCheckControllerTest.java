@@ -32,26 +32,29 @@ public class FraudCheckControllerTest {
     public void testPostOk() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testPostBadInvalidCard() throws Exception {
+    public void testPostCardNotEncrypted() throws Exception {
 
-        mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555455554433\"}")
+        MvcResult resp = mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.field").value("cardNumber"));
+                .andReturn();
+
+        String error = resp.getResolvedException().getMessage();
+        assertEquals("Could not decrypt card PAN", error);
     }
 
     @Test
     public void testPostInvalidCurrency() throws Exception {
 
         MvcResult resp = mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"NNN\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"NNN\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -64,7 +67,7 @@ public class FraudCheckControllerTest {
     public void testPostInvalidCurrencyISOCode() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"GB\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"GB\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("currency"));
@@ -74,7 +77,7 @@ public class FraudCheckControllerTest {
     public void testPostInvalidThreatScore() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":140,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":140,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("threatScore"));
@@ -84,7 +87,7 @@ public class FraudCheckControllerTest {
     public void testPostEmptyTerminalId() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\" \",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\" \",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("terminalId"));
@@ -94,7 +97,7 @@ public class FraudCheckControllerTest {
     public void testPostNegativeAmount() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":-200,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":-200,\"currency\":\"EUR\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("amount"));

@@ -5,6 +5,7 @@ import com.pql.fraudcheck.exception.CurrencyException;
 import com.pql.fraudcheck.exception.FraudCheckException;
 import com.pql.fraudcheck.exception.TerminalException;
 import com.pql.fraudcheck.rules.FraudRulesHandler;
+import com.pql.fraudcheck.util.CardUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class TransFraudService {
 
 
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
-        log.info("Started fraud check for cardNumber::* * * {} and terminalId::{}", request.getCardNumber().substring(12), request.getTerminalId());
+        log.info("Started fraud check for cardNumber::{} and terminalId::{}", CardUtil.getMaskedPan(request.getCardNumber()), request.getTerminalId());
 
         // if currency is invalid there is no need to proceed
         checkCurrency(request.getCurrency());
@@ -71,7 +72,7 @@ public class TransFraudService {
             fraudDetectedService.saveFraud(request, response);
         }
 
-        log.info("Fraud check for cardNumber::{} and terminalId::{} complete", request.getCardNumber().substring(12), request.getTerminalId());
+        log.info("Fraud check for cardNumber::{} and terminalId::{} complete", CardUtil.getMaskedPan(request.getCardNumber()), request.getTerminalId());
 
         return response;
     }

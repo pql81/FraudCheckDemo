@@ -18,11 +18,14 @@ public class FraudDetected {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // useful for debugging/monitoring - same value held in MDC
+    private String requestId;
+
     private String terminalId;
     private Double amount;
     private String currency;
     private Integer threatScore;
-    private String lastCardDigits;
+    private String maskedCardNumber;
 
     private String rejectionMessage;
     private Integer fraudScore;

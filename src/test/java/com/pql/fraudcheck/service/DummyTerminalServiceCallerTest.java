@@ -9,16 +9,14 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.when;
@@ -30,7 +28,7 @@ import static org.mockito.Mockito.when;
 public class DummyTerminalServiceCallerTest {
 
     @Mock
-    private RestTemplate restTemplate;
+    private ServiceClientWithRetry serviceClientWithRetry;
 
     @InjectMocks
     DummyTerminalServiceCaller dummyTerminalServiceCaller;
@@ -38,12 +36,12 @@ public class DummyTerminalServiceCallerTest {
 
     @Before
     public void setUp() {
-        dummyTerminalServiceCaller.transactionServiceUrl = "http://test.io";
+        ReflectionTestUtils.setField(dummyTerminalServiceCaller, "terminalServiceUrl", "http://test.io");
 
-        when(restTemplate.exchange(contains("transactions"), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(145, HttpStatus.OK));
-        when(restTemplate.exchange(contains("last-location"), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(new TerminalLocationResponse(2.002, 1.001), HttpStatus.OK));
+        when(serviceClientWithRetry.sendGetRequest(contains("transactions"), ArgumentMatchers.<Class<Integer>>any()))
+                .thenReturn(145);
+        when(serviceClientWithRetry.sendGetRequest(contains("last-location"), ArgumentMatchers.<Class<TerminalLocationResponse>>any()))
+                .thenReturn(new TerminalLocationResponse(2.002, 1.001));
     }
 
     @Test
@@ -57,8 +55,8 @@ public class DummyTerminalServiceCallerTest {
 
     @Test(expected = RuntimeException.class)
     public void testGetTerminalLocationFailure() throws Throwable {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenThrow(RuntimeException.class);
+        when(serviceClientWithRetry.sendGetRequest(anyString(), ArgumentMatchers.<Class<TerminalLocationResponse>>any()))
+                .thenThrow(RuntimeException.class);
 
         CompletableFuture<TerminalLocationResponse> response = dummyTerminalServiceCaller.getTerminalLocation("test01");
 
@@ -71,8 +69,8 @@ public class DummyTerminalServiceCallerTest {
 
     @Test(expected = TerminalException.class)
     public void testGetTerminalLocationNotFound() throws Throwable {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(HttpStatus.NOT_FOUND));
+        when(serviceClientWithRetry.sendGetRequest(anyString(), ArgumentMatchers.<Class<TerminalLocationResponse>>any()))
+                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         CompletableFuture<TerminalLocationResponse> response = dummyTerminalServiceCaller.getTerminalLocation("test01");
 
@@ -93,8 +91,8 @@ public class DummyTerminalServiceCallerTest {
 
     @Test(expected = RuntimeException.class)
     public void testGetTerminalLastTransactionsFailure() throws Throwable {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenThrow(RuntimeException.class);
+        when(serviceClientWithRetry.sendGetRequest(anyString(), ArgumentMatchers.<Class<Integer>>any()))
+                .thenThrow(RuntimeException.class);
 
         CompletableFuture<Integer> response = dummyTerminalServiceCaller.getTerminalLastTransactions("test01", 24);
 
@@ -107,8 +105,8 @@ public class DummyTerminalServiceCallerTest {
 
     @Test(expected = TerminalException.class)
     public void testGetTerminalLastTransactionsNotFound() throws Throwable {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
-                ArgumentMatchers.<Class<String>>any())).thenReturn(new ResponseEntity(HttpStatus.NOT_FOUND));
+        when(serviceClientWithRetry.sendGetRequest(anyString(), ArgumentMatchers.<Class<Integer>>any()))
+                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         CompletableFuture<Integer> response = dummyTerminalServiceCaller.getTerminalLastTransactions("test01", 24);
 

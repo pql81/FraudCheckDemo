@@ -5,6 +5,7 @@ import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 import com.pql.fraudcheck.exception.CorruptedDataException;
 import lombok.extern.log4j.Log4j2;
 import org.javamoney.moneta.FastMoney;
+import org.javamoney.moneta.format.CurrencyStyle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,10 @@ import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
+import javax.money.format.AmountFormatQueryBuilder;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
+import java.util.Locale;
 
 /**
  * Created by pasqualericupero on 06/05/2021.
@@ -20,14 +25,21 @@ import javax.money.convert.MonetaryConversions;
 @Component("AMOUNT_SCORE")
 public class AmountAndScoreRule implements IFraudDetection {
 
-    private CurrencyConversion conversionForCalculation;
-    private FastMoney amountThreshold;
+    private final CurrencyConversion conversionForCalculation;
+    private final FastMoney amountThreshold;
+    private final MonetaryAmountFormat format;
 
 
     public AmountAndScoreRule(@Value("${fraud.amount.threshold.value}") int threshold,
                               @Value("${fraud.amount.threshold.currency}") String thresholdCurrency) {
         this.conversionForCalculation = MonetaryConversions.getConversion(thresholdCurrency);
         this.amountThreshold = FastMoney.of(threshold, thresholdCurrency);
+
+        this.format = MonetaryFormats.getAmountFormat(
+                AmountFormatQueryBuilder.of(Locale.ITALY) // it's just the way to display amount and currency
+                        .set(CurrencyStyle.CODE)
+                        .build()
+        );
     }
 
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
@@ -36,19 +48,19 @@ public class AmountAndScoreRule implements IFraudDetection {
         CurrencyUnit inputCurrency = Monetary.getCurrency(transInfo.getCurrency());
         FastMoney amount = FastMoney.of(transInfo.getAmount(), inputCurrency);
 
-        log.info("Processing input amount::{}", amount.toString());
+        log.info("Processing input amount::{}", format.format(amount));
 
         FastMoney inputAmountNormalized = amount.with(conversionForCalculation);
         FastMoney applicableThreshold = calculateApplicableThreshold(transInfo.getThreatScore());
 
-        log.info("Calculated threshold::{}", applicableThreshold.toString());
+        log.info("Calculated threshold::{}", format.format(applicableThreshold));
 
         Integer fraudScore = 0;
         String message = null;
         if (inputAmountNormalized.isGreaterThan(applicableThreshold)) {
             message = "Transaction amount exceeds the upper limit for the terminal";
             fraudScore = calculateFraudScore(transInfo.getThreatScore());
-            log.warn("{}::{}", message, inputAmountNormalized.toString());
+            log.warn("{}::{}", message, format.format(inputAmountNormalized));
         }
 
         return new FraudRuleScore(fraudScore, message);

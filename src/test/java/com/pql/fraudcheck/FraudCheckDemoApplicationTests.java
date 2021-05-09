@@ -33,7 +33,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckAllowed() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.ALLOWED.name()))
@@ -45,7 +45,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckDeniedAmount() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":1000,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":20,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":1000,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":20,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.DENIED.name()))
@@ -57,7 +57,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckDeniedTerminal() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0102\",\"threatScore\":10,\"cardNumber\":\"5555444455554433\"}")
+                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0102\",\"threatScore\":10,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.DENIED.name()))
@@ -69,7 +69,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckDeniedCard() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"5555444455554431\"}")
+                .content("{\"amount\":600,\"currency\":\"GBP\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.DENIED.name()))
@@ -78,10 +78,28 @@ public class FraudCheckDemoApplicationTests {
     }
 
     @Test
+    public void testFraudCheckDeniedCardNumberTooShort() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"EUR\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"tEE/B1pfMoDCJ4rs+Kj1ew==\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testFraudCheckDeniedCardNumberTooLong() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"USD\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"yn+alOw6qL669H09HQEMEcXAY0P4B4o92sbNbeDByOg=\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testFraudCheckDeniedCurrency() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"ABC\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"5555444455554431\"}")
+                .content("{\"amount\":600,\"currency\":\"ABC\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -90,7 +108,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckDeniedCurrencyFormat() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":600,\"currency\":\"GB\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"5555444455554431\"}")
+                .content("{\"amount\":600,\"currency\":\"GB\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -99,7 +117,7 @@ public class FraudCheckDemoApplicationTests {
     public void testFraudCheckDeniedCombined() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
-                .content("{\"amount\":2000,\"currency\":\"GBP\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"5555444455554431\"}")
+                .content("{\"amount\":2000,\"currency\":\"GBP\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.DENIED.name()))

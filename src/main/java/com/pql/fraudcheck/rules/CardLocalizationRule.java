@@ -19,15 +19,19 @@ public class CardLocalizationRule implements IFraudDetection {
         Integer fraudScore = 0;
         String message = null;
 
-        // mocked service - just place some trivial logic to eventually return a value different from 0
-        if (Math.abs(transInfo.getTerminalLat() - transInfo.getCardLastLocationLat()) > 0.01
-            || Math.abs(transInfo.getTerminalLong() - transInfo.getCardLastLocationLong()) > 0.01) {
-            fraudScore = 25;
-        }
+        if (transInfo.getCardLastLocationLat() != null && transInfo.getCardLastLocationLong() != null) {
+            // mocked service - just place some trivial logic to eventually return a value different from 0
+            if (Math.abs(transInfo.getTerminalLat() - transInfo.getCardLastLocationLat()) > 0.01
+                    || Math.abs(transInfo.getTerminalLong() - transInfo.getCardLastLocationLong()) > 0.01) {
+                fraudScore = 25;
+            }
 
-        if (fraudScore > 0) {
-            message =  "Location of last card transaction is suspicious";
-            log.warn("{}::{},{}", message, transInfo.getCardLastLocationLat(), transInfo.getCardLastLocationLong());
+            if (fraudScore > 0) {
+                message = "Location of last card transaction is suspicious";
+                log.warn("{}::{},{}", message, transInfo.getCardLastLocationLat(), transInfo.getCardLastLocationLong());
+            }
+        } else {
+            log.info("Card last location not available - skip");
         }
 
         return new FraudRuleScore(fraudScore, message);
