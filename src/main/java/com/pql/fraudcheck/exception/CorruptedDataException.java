@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Created by pasqualericupero on 07/05/2021.
  */
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Data corrupted during processing")
+@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Data corrupted during processing")
 public class CorruptedDataException extends RuntimeException {
 
     public CorruptedDataException(String message) {
