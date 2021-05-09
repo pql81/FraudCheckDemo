@@ -5,6 +5,7 @@ import com.pql.fraudcheck.dto.FraudCheckRequest;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.repository.FraudDetectedRepository;
 import org.jboss.logging.MDC;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,11 @@ public class FraudDetectedServiceTest {
         fraudToSave.setTerminalId("test123");
 
         when(fraudDetectedRepository.save(any())).thenReturn(fraudToSave);
+    }
+
+    @After
+    public void tearDown() {
+        MDC.clear();
     }
 
     @Test
