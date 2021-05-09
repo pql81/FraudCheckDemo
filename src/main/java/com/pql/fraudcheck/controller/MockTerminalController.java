@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Log4j2
 @RestController
+// FOR TESTING PURPOSE - THIS IS SUPPOSED TO BE A DIFFERENT MICROSERVICE WITH PROPER BUSINESS LOGIC
+// In this case it just returns fixed data
 public class MockTerminalController {
 
     @GetMapping("/mock/terminal/{terminalId}/transactions")
