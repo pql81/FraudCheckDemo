@@ -47,7 +47,7 @@ public class FraudCheckControllerTest {
                 .andReturn();
 
         String error = resp.getResolvedException().getMessage();
-        assertEquals("Could not encrypt card PAN", error);
+        assertEquals("Could not decrypt card PAN", error);
     }
 
     @Test

@@ -25,7 +25,7 @@ public class FraudDetected {
     private Double amount;
     private String currency;
     private Integer threatScore;
-    private String lastCardDigits;
+    private String maskedCardNumber;
 
     private String rejectionMessage;
     private Integer fraudScore;

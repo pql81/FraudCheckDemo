@@ -38,7 +38,7 @@ public class FraudDetectedService {
         fraud.setCurrency(request.getCurrency());
         fraud.setTerminalId(request.getTerminalId());
         fraud.setThreatScore(request.getThreatScore());
-        fraud.setLastCardDigits(CardUtil.getMaskedPan(request.getCardNumber()));
+        fraud.setMaskedCardNumber(CardUtil.getMaskedPan(request.getCardNumber()));
         fraud.setRejectionMessage(response.getRejectionMessage());
         fraud.setFraudScore(response.getFraudScore());
 
