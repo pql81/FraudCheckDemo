@@ -19,7 +19,7 @@ import java.util.UUID;
 @Log4j2
 public class LogFilter implements Filter {
 
-    private final static String REQUEST_ID_HEADER = "transaction-id";
+    private final static String REQUEST_ID_HEADER = "correlation-id";
     private final static String REQUEST_ID_MDC = "requestId";
 
 
