@@ -27,7 +27,7 @@ public class FraudCheckRequest {
     private Integer threatScore;
 
     @NotNull(message = "Cannot be empty")
-    @Pattern(regexp = "^[0-9]{13,16}", message="Must be between 13 and 16 digits")
+//    @Pattern(regexp = "^[0-9]{13,16}", message="Must be between 13 and 16 digits")
     private String cardNumber;
 
     @Override
@@ -37,7 +37,7 @@ public class FraudCheckRequest {
                 ", currency=" + currency +
                 ", terminalId=" + terminalId +
                 ", threatScore=" + threatScore +
-                ", cardNumber=* * * " + cardNumber.substring(12) +
+                ", cardNumber=****" +
                 ')';
     }
 }

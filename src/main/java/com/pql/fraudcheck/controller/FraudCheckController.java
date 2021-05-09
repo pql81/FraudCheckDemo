@@ -2,6 +2,8 @@ package com.pql.fraudcheck.controller;
 
 import com.pql.fraudcheck.dto.FraudCheckRequest;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
+import com.pql.fraudcheck.exception.CardPanException;
+import com.pql.fraudcheck.service.SimpleEncryptionService;
 import com.pql.fraudcheck.service.TransFraudService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,20 @@ public class FraudCheckController {
     @Autowired
     private TransFraudService transFraudService;
 
+    @Autowired
+    private SimpleEncryptionService encryptionService;
+
 
     @PostMapping("/fraud-check")
     public ResponseEntity<FraudCheckResponse> fraudCheck(@Validated @RequestBody FraudCheckRequest request) {
         log.info("POST fraud-check " + request);
+
+        String decryptedPan = encryptionService.decrypt(request.getCardNumber());
+        if (decryptedPan.length() < 13 || decryptedPan.length() > 16) {
+            throw new CardPanException("Must be between 13 and 16 digits");
+        }
+
+        request.setCardNumber(decryptedPan);
 
         FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
 
