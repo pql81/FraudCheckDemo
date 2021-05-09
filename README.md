@@ -57,11 +57,11 @@ In order to test the service, as it is a demo using mocked external services (ca
 - Terminal Id ending with 02 or 03: too many transactions for this terminal (respectively 697 and 980 transactions)
 - Adjusting amount, currency and threatScore triggers or not the amount limit rule
 
-As card numbers are expected to send encrypted, here is a list of values to use in the request:
-- KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=  (valid card, low transaction number)
-- tkVaENbCuVcZEf4th6bBpvzDnfblo2rxTHXOSEEaDqw=  (card ending in 31, amount exceeded the limit for this terminal - score 15)
-- ERIhdVg9zZKjBX5nTrZmhBwf1/F1OqWBGxFU3nRJx2g=  (card ending in 32, amount exceeded the limit for this terminal - score 50)
-- M52w7xu90R8MeWLrgaBIIg==                      (invalid card, pan too short)
+As card numbers are expected to be send encrypted, here is a list of valid values to use in the request:
+- `KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=` (valid card, low transaction number)
+- `tkVaENbCuVcZEf4th6bBpvzDnfblo2rxTHXOSEEaDqw=` (card ending in 31, amount exceeded the limit for this terminal - score 15)
+- `ERIhdVg9zZKjBX5nTrZmhBwf1/F1OqWBGxFU3nRJx2g=` (card ending in 32, amount exceeded the limit for this terminal - score 50)
+- `M52w7xu90R8MeWLrgaBIIg==`                     (invalid card, pan too short)
 
-Running test SimpleEncryptionServiceTest will display a list of card and their encrypted value.
+Running test SimpleEncryptionServiceTest will display a list of card and their encrypted values.
 
