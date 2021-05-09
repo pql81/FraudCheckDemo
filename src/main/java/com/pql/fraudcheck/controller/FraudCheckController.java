@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class FraudCheckController {
 
     @Autowired
-    private TransFraudService encryptionService;
+    private TransFraudService transFraudService;
 
     @Autowired
-    private SimpleEncryptionService transFraudService;
+    private SimpleEncryptionService encryptionService;
 
 
     @PostMapping("/fraud-check")
@@ -39,7 +39,7 @@ public class FraudCheckController {
         try {
             String decryptedPan = encryptionService.decrypt(request.getCardNumber());
             if (decryptedPan.length() < 13 || decryptedPan.length() > 16) {
-                throw new CardPanException("Must be between 13 and 16 digits");
+                throw new CardPanException("Card pan must be between 13 and 16 digits");
             }
             request.setCardNumber(decryptedPan);
 

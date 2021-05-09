@@ -4,6 +4,7 @@ import com.pql.fraudcheck.exception.CardPanException;
 import lombok.extern.log4j.Log4j2;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,17 +17,19 @@ public class SimpleEncryptionService {
     private StandardPBEStringEncryptor encryptor;
 
 
-    public SimpleEncryptionService() {
+    public SimpleEncryptionService(@Value("${encryption.service.secret}") String password,
+                                   @Value("${encryption.service.algorithm}") String algorithm ) {
+
         encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword("decidelater");
-        encryptor.setAlgorithm("PBEWithMD5AndTripleDES");
+        encryptor.setPassword(password);
+        encryptor.setAlgorithm(algorithm);
     }
 
     public String encrypt(String plainText) {
         try {
             return encryptor.encrypt(plainText);
         } catch (EncryptionOperationNotPossibleException e) {
-            throw new CardPanException("Could not decrypt card PAN");
+            throw new CardPanException("Could not decrypt card PAN", e);
         }
     }
 
@@ -34,7 +37,7 @@ public class SimpleEncryptionService {
         try {
             return encryptor.decrypt(encryptedText);
         } catch (EncryptionOperationNotPossibleException e) {
-            throw new CardPanException("Could not encrypt card PAN");
+            throw new CardPanException("Could not encrypt card PAN", e);
         }
     }
 }

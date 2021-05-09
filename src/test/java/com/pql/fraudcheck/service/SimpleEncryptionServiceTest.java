@@ -1,8 +1,8 @@
 package com.pql.fraudcheck.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -13,9 +13,13 @@ import java.util.Arrays;
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleEncryptionServiceTest {
 
-    @InjectMocks
     SimpleEncryptionService encryptionService;
 
+
+    @Before
+    public void setUp() {
+        encryptionService = new SimpleEncryptionService("decidelater", "PBEWithMD5AndTripleDES");
+    }
 
     @Test
     public void testEncrypt() throws Exception {

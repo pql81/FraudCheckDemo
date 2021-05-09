@@ -33,6 +33,9 @@ terminal.service.url: https://transaction-service:9091
 fraud.amount.threshold.value: 1000
 fraud.amount.threshold.currency: USD
 
+encryption.service.secret: decidelater
+encryption.service.algorithm: PBEWithMD5AndTripleDES
+
 #server.ssl:
 #  enabled: true
 #  key-store-type: PKCS12
