@@ -28,7 +28,7 @@ rest.template.connection.timeout.millis: 100
 rest.template.read.timeout.millis: 100
 
 card.service.url: https://card-service:9090
-transaction.service.url: https://transaction-service:9091
+terminal.service.url: https://transaction-service:9091
 
 fraud.amount.threshold.value: 1000
 fraud.amount.threshold.currency: USD
@@ -44,8 +44,14 @@ fraud.amount.threshold.currency: USD
 resilience4j.retry:
   configs:
     default:
-      maxRetryAttempts: 2
+      maxRetryAttempts: 3
       waitDuration: 100
+      ignoreExceptions:
+        - org.springframework.web.client.HttpClientErrorException
+        - java.net.UnknownHostException
+        - com.pql.fraudcheck.exception.TerminalException
+        - java.io.IOException
+        - org.springframework.web.client.ResourceAccessException
 
 resilience4j.circuitbreaker:
   configs:
@@ -66,3 +72,4 @@ resilience4j.circuitbreaker:
       ignoreExceptions:
         - org.springframework.web.client.HttpClientErrorException
         - java.net.UnknownHostException
+        - com.pql.fraudcheck.exception.TerminalException

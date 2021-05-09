@@ -2,17 +2,13 @@ package com.pql.fraudcheck.service;
 
 import com.pql.fraudcheck.dto.CardResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
@@ -27,15 +23,14 @@ import java.util.concurrent.CompletableFuture;
 public class DummyCardServiceCaller {
 
     @Value("${card.service.url}")
-    String cardServiceUrl;
+    private String cardServiceUrl;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private ServiceClientWithRetry serviceClientWithRetry;
 
 
     @Async
     @CircuitBreaker(name="cardService", fallbackMethod="getCardUsageFallback")
-    @Retry(name="cardService", fallbackMethod="getCardUsageFallback")
     public CompletableFuture<Integer> getCardUsage(String cardNumber, Integer lastHours) {
         // restTemplate to call external card service (not in same cluster)
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
@@ -43,25 +38,30 @@ public class DummyCardServiceCaller {
 
         String url = cardServiceUrl+"/card/{number}/transactions";
 
+
         Map<String, String> params = new HashMap<>();
         params.put("number", cardNumber);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("lastHours", lastHours);
 
-        HttpEntity<?> entity = new HttpEntity<>(getHeaders());
-
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
         try {
             log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-            Integer response = restTemplate.exchange(
-                    builder.buildAndExpand(params).toUriString(),
-                    HttpMethod.GET, entity,
-                    Integer.class).getBody();
 
+            Integer response = serviceClientWithRetry.sendGetRequest(builder.buildAndExpand(params).toUriString(), Integer.class);
             future.complete(response);
+
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                // assuming 404 in this case means no recent transaction found for this card
+                future.complete(0);
+            } else {
+                future.completeExceptionally(e);
+            }
         } catch (Exception e) {
+            log.warn("Call to service failed");
             future.completeExceptionally(e);
         }
 
@@ -73,23 +73,30 @@ public class DummyCardServiceCaller {
         // in a real scenario this method should handle a fallback properly
         log.warn("CardService.getCardUsage() fallback called");
 
-        Integer transNum;
+        CompletableFuture<Integer> future = new CompletableFuture<>();
 
-        // for test purpose
-        if (cardNumber.endsWith("31")) {
-            transNum = 30;
-        } else if (cardNumber.endsWith("32")) {
-            transNum = 80;
+        if (t instanceof HttpClientErrorException) {
+            future.completeExceptionally(t);
         } else {
-            transNum = 15;
+            Integer transNum;
+
+            // for test purpose
+            if (cardNumber.endsWith("31")) {
+                transNum = 30;
+            } else if (cardNumber.endsWith("32")) {
+                transNum = 80;
+            } else {
+                transNum = 15;
+            }
+
+            future.complete(transNum);
         }
 
-        return CompletableFuture.completedFuture(transNum);
+        return future;
     }
 
     @Async
     @CircuitBreaker(name="cardService", fallbackMethod="getCardLastLocationFallback")
-    @Retry(name="cardService", fallbackMethod="getCardLastLocationFallback")
     public CompletableFuture<CardResponse> getCardLastLocation(String cardNumber) {
         // restTemplate to call external card service (not in same cluster)
         // this is a non existing service, circuit breaker falls back to a mocked version returning fixed values
@@ -102,19 +109,23 @@ public class DummyCardServiceCaller {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
 
-        HttpEntity<?> entity = new HttpEntity<>(getHeaders());
-
         CompletableFuture<CardResponse> future = new CompletableFuture<>();
 
         try {
             log.info("Calling service::{}", builder.build().toUriString()); // do not log the card number
-            CardResponse response = restTemplate.exchange(
-                    builder.buildAndExpand(params).toUriString(),
-                    HttpMethod.GET, entity,
-                    CardResponse.class).getBody();
 
+            CardResponse response = serviceClientWithRetry.sendGetRequest(builder.buildAndExpand(params).toUriString(), CardResponse.class);
             future.complete(response);
+
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                // no geolocation available - setting null values
+                future.complete(new CardResponse(null, null));
+            } else {
+                future.completeExceptionally(e);
+            }
         } catch (Exception e) {
+            log.warn("Call to service failed");
             future.completeExceptionally(e);
         }
 
@@ -126,15 +137,16 @@ public class DummyCardServiceCaller {
         // in a real scenario this method should handle a fallback properly
         log.warn("CardService.getCardLastLocation() fallback called");
 
-        CardResponse response = new CardResponse(-1.276, 2.315);
+        CompletableFuture<CardResponse> future = new CompletableFuture<>();
 
-        return CompletableFuture.completedFuture(response);
-    }
+        if (t instanceof HttpClientErrorException) {
+            future.completeExceptionally(t);
+        } else {
+            CardResponse response = new CardResponse(-1.276, 2.315);
 
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+            future.complete(response);
+        }
 
-        return headers;
+        return future;
     }
 }
