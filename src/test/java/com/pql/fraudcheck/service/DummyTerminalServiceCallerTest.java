@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,13 +30,11 @@ public class DummyTerminalServiceCallerTest {
     private ServiceClientWithRetry serviceClientWithRetry;
 
     @InjectMocks
-    DummyTerminalServiceCaller dummyTerminalServiceCaller;
+    DummyTerminalServiceCaller dummyTerminalServiceCaller = new DummyTerminalServiceCaller("http://test.io");
 
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(dummyTerminalServiceCaller, "terminalServiceUrl", "http://test.io");
-
         when(serviceClientWithRetry.sendGetRequest(contains("transactions"), ArgumentMatchers.<Class<Integer>>any()))
                 .thenReturn(145);
         when(serviceClientWithRetry.sendGetRequest(contains("last-location"), ArgumentMatchers.<Class<TerminalLocationResponse>>any()))

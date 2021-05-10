@@ -22,15 +22,20 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class DummyCardServiceCaller {
 
-    @Value("${card.service.url}")
-    private String cardServiceUrl;
-
     @Autowired
     private ServiceClientWithRetry serviceClientWithRetry;
 
     @Autowired
     private SimpleEncryptionService simpleEncryptionService;
 
+    private final String cardServiceUrl;
+    private final String cardUsagePath = "/card/{number}/transactions";
+    private final String cardLocationPath = "/card/{number}/last-location";
+
+
+    public DummyCardServiceCaller(@Value("${card.service.url}") String cardServiceUrl) {
+        this.cardServiceUrl = cardServiceUrl;
+    }
 
     @Async
     @CircuitBreaker(name="cardService", fallbackMethod="getCardUsageFallback")
@@ -41,7 +46,7 @@ public class DummyCardServiceCaller {
 
         log.info("CardService.getCardUsage() called");
 
-        String url = cardServiceUrl+"/card/{number}/transactions";
+        String url = cardServiceUrl + cardUsagePath;
 
         Map<String, String> params = new HashMap<>();
         params.put("number", simpleEncryptionService.encrypt(cardNumber));
@@ -106,7 +111,7 @@ public class DummyCardServiceCaller {
 
         log.info("CardService.getCardLastLocation() called");
 
-        String url = cardServiceUrl+"/card/{number}/last-location";
+        String url = cardServiceUrl + cardLocationPath;
 
         Map<String, String> params = new HashMap<>();
         params.put("number", simpleEncryptionService.encrypt(cardNumber));
