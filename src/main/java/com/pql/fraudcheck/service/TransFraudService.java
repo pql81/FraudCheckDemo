@@ -8,6 +8,7 @@ import com.pql.fraudcheck.rules.FraudRulesHandler;
 import com.pql.fraudcheck.util.CardUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.money.Monetary;
@@ -37,6 +38,15 @@ public class TransFraudService {
     @Autowired
     private FraudDetectedService fraudDetectedService;
 
+    private final int cardTransWindowHours;
+    private final int terminalTransWindowHours;
+
+
+    public TransFraudService(@Value("${fraud.transactions.card.range.hours}") int cardTransWindowHours,
+                             @Value("${fraud.transactions.terminal.range.hours}") int terminalTransWindowHours) {
+        this.cardTransWindowHours = cardTransWindowHours;
+        this.terminalTransWindowHours = terminalTransWindowHours;
+    }
 
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
         log.info("Started fraud check for cardNumber::{} and terminalId::{}", CardUtil.getMaskedPan(request.getCardNumber()), request.getTerminalId());
@@ -103,9 +113,9 @@ public class TransFraudService {
         // call to external services in parallel in order to reduce general call time
         List<CompletableFuture> allFutures = new ArrayList<>();
 
-        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), 24));
+        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), cardTransWindowHours));
         allFutures.add(1, dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
-        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),24));
+        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),terminalTransWindowHours));
         allFutures.add(3, dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
 
         CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();

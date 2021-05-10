@@ -41,7 +41,7 @@ public class TransFraudServiceTest {
     FraudRulesHandler fraudRulesHandler;
 
     @InjectMocks
-    TransFraudService transFraudService;
+    TransFraudService transFraudService = new TransFraudService(24, 24);
 
 
     @Before

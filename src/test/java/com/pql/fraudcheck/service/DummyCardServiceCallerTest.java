@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.concurrent.CompletableFuture;
@@ -34,13 +33,11 @@ public class DummyCardServiceCallerTest {
     private SimpleEncryptionService simpleEncryptionService;
 
     @InjectMocks
-    DummyCardServiceCaller dummyCardServiceCaller;
+    DummyCardServiceCaller dummyCardServiceCaller = new DummyCardServiceCaller("http://test.io");
 
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(dummyCardServiceCaller, "cardServiceUrl", "http://test.io");
-
         when(serviceClientWithRetry.sendGetRequest(contains("transactions"), ArgumentMatchers.<Class<Integer>>any()))
                 .thenReturn(25);
         when(serviceClientWithRetry.sendGetRequest(contains("last-location"), ArgumentMatchers.<Class<CardResponse>>any()))
