@@ -38,14 +38,14 @@ public class TransFraudService {
     @Autowired
     private FraudDetectedService fraudDetectedService;
 
-    private final int cardTransWindowHours;
-    private final int terminalTransWindowHours;
+    private final int cardTransHoursRange;
+    private final int terminalTransHoursRange;
 
 
-    public TransFraudService(@Value("${fraud.transactions.card.range.hours}") int cardTransWindowHours,
-                             @Value("${fraud.transactions.terminal.range.hours}") int terminalTransWindowHours) {
-        this.cardTransWindowHours = cardTransWindowHours;
-        this.terminalTransWindowHours = terminalTransWindowHours;
+    public TransFraudService(@Value("${fraud.card.transactions.range.hours}") int cardTransHoursRange,
+                             @Value("${fraud.terminal.transactions.range.hours}") int terminalTransHoursRange) {
+        this.cardTransHoursRange = cardTransHoursRange;
+        this.terminalTransHoursRange = terminalTransHoursRange;
     }
 
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
@@ -113,9 +113,9 @@ public class TransFraudService {
         // call to external services in parallel in order to reduce general call time
         List<CompletableFuture> allFutures = new ArrayList<>();
 
-        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), cardTransWindowHours));
+        allFutures.add(0, dummyCardServiceCaller.getCardUsage(request.getCardNumber(), cardTransHoursRange));
         allFutures.add(1, dummyCardServiceCaller.getCardLastLocation(request.getCardNumber()));
-        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),terminalTransWindowHours));
+        allFutures.add(2, dummyTerminalServiceCaller.getTerminalLastTransactions(request.getTerminalId(),terminalTransHoursRange));
         allFutures.add(3, dummyTerminalServiceCaller.getTerminalLocation(request.getTerminalId()));
 
         CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
