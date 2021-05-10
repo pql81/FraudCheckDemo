@@ -23,12 +23,17 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class DummyTerminalServiceCaller {
 
-    @Value("${terminal.service.url}")
-    private String terminalServiceUrl;
-
     @Autowired
     private ServiceClientWithRetry serviceClientWithRetry;
 
+    private final String terminalServiceUrl;
+    private final String terminalTransPath = "/terminal/{terminalId}/transactions";
+    private final String terminalLocationPath = "/terminal/{terminalId}/last-location";
+
+
+    public DummyTerminalServiceCaller(@Value("${terminal.service.url}") String terminalServiceUrl) {
+        this.terminalServiceUrl = terminalServiceUrl;
+    }
 
     @Async
     @CircuitBreaker(name="terminalService", fallbackMethod="getTerminalLastTransactionsFallback")
@@ -39,7 +44,7 @@ public class DummyTerminalServiceCaller {
 
         log.info("TerminalService.getTerminalLastTransactions() called");
 
-        String url = terminalServiceUrl+"/terminal/{terminalId}/transactions";
+        String url = terminalServiceUrl + terminalTransPath;
 
         Map<String, String> params = new HashMap<>();
         params.put("terminalId", terminalId);
@@ -104,7 +109,7 @@ public class DummyTerminalServiceCaller {
 
         log.info("TerminalService.getTerminalLocation() called");
 
-        String url = terminalServiceUrl+"/terminal/{terminalId}/last-location";
+        String url = terminalServiceUrl + terminalLocationPath;
 
         Map<String, String> params = new HashMap<>();
         params.put("terminalId", terminalId);
