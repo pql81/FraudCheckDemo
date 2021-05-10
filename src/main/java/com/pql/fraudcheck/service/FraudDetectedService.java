@@ -11,6 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * Created by pasqualericupero on 06/05/2021.
  */
@@ -23,6 +28,30 @@ public class FraudDetectedService {
     @Autowired
     private FraudDetectedRepository fraudDetectedRepository;
 
+
+    public List<FraudDetected> listFrauds() {
+        Iterable<FraudDetected> frauds = fraudDetectedRepository.findAll();
+
+        List<FraudDetected> response = StreamSupport
+                .stream(frauds.spliterator(), false)
+                .collect(Collectors.toList());
+
+        return response;
+    }
+
+    public FraudDetected getFraud(String requestId) {
+        Optional<FraudDetected> fraud = fraudDetectedRepository.findByRequestId(requestId);
+
+        FraudDetected response = null;
+
+        if (fraud.isPresent()) {
+            response = fraud.get();
+        } else {
+            log.warn("Detected fraud not found - reference: {}", requestId);
+        }
+
+        return response;
+    }
 
     @Async
     public void saveFraud(FraudCheckRequest request, FraudCheckResponse response) {

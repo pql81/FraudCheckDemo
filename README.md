@@ -30,7 +30,7 @@ Alternatively curl can be used to send a request:
 
 ```shell
 $ cd FraudCheckDemo/src/main/resources/keystore/client
-$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"5555444455554444\"}" --cert ./client/client.cer --key ./client/client_key.pem --insecure
+$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=\"}" --cert ./client/client.cer --key ./client/client_key.pem --insecure
 ```
 
 #### OpenAPI documetation and UI test
@@ -52,7 +52,16 @@ $ mvn test
 
 In order to test the service, as it is a demo using mocked external services (card geo-location, terminal info), there are some particular request values that trigger a particular fraud:
 
-- Card number ending in 31 or 32: amount exceeded the limit for this terminal (respectively 30 and 80 transactions for the card)
-- Terminal Id not starting with 'T': terminal not found error
-- Terminal Id ending with 02 or 03: too many transactions for this terminal (respectively 697 and 980 transactions)
+- Card number ending in `31` or `32`: amount exceeded the limit for this terminal (respectively 30 and 80 transactions for the card)
+- Terminal Id not starting with `T`: terminal not found error
+- Terminal Id ending with `02` or `03`: too many transactions for this terminal (respectively 697 and 980 transactions)
 - Adjusting amount, currency and threatScore triggers or not the amount limit rule
+
+As card numbers are expected to be send encrypted, here is a list of valid values to use in the request:
+- `KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=` (valid card, low transaction number)
+- `tkVaENbCuVcZEf4th6bBpvzDnfblo2rxTHXOSEEaDqw=` (card ending in 31, amount exceeded the limit for this terminal - score 15)
+- `ERIhdVg9zZKjBX5nTrZmhBwf1/F1OqWBGxFU3nRJx2g=` (card ending in 32, amount exceeded the limit for this terminal - score 50)
+- `M52w7xu90R8MeWLrgaBIIg==`                     (invalid card, pan too short)
+
+Running test SimpleEncryptionServiceTest will display a list of card and their encrypted values.
+
