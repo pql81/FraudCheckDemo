@@ -51,7 +51,7 @@ public class FraudCheckService {
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
         log.info("Started fraud check for cardNumber::{} and terminalId::{}", CardUtil.getMaskedPan(request.getCardNumber()), request.getTerminalId());
 
-        // if currency is invalid there is no need to proceed
+        // why this check here? if currency is invalid then there is no need to proceed, return 422 and save time
         checkCurrency(request.getCurrency());
 
         FraudCheckResponse response;
