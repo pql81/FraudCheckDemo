@@ -23,7 +23,7 @@ public class CardTransactionFrequencyRule implements IFraudDetection {
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
         if (transInfo.getRecentCardTransactionNumber() < 0) {
             // it shouldn't happen as input data is validated at controller level
-            log.warn("Data corrupted during fraud check process");
+            log.error("Data corrupted during fraud check process");
             throw new CorruptedDataException("Corrupted data in input");
         }
 
