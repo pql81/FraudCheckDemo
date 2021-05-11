@@ -101,7 +101,16 @@ public class FraudCheckDemoApplicationTests {
         mockMvc.perform(post("/fraud-check")
                 .content("{\"amount\":600,\"currency\":\"ABC\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testFraudCheckDeniedObsoleteCurrency() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"ITL\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"TrqkmOR3U/xi1Ks8I+hLp2dt4DCei7Uzoi/bU4cH2Ck=\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

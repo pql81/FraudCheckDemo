@@ -57,7 +57,7 @@ public class FraudCheckControllerTest {
         MvcResult resp = mockMvc.perform(post("/fraud-check")
                 .content("{\"amount\":600,\"currency\":\"NNN\",\"terminalId\":\"T0102\",\"threatScore\":40,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
         String error = resp.getResolvedException().getMessage();
