@@ -4,6 +4,7 @@ import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 import com.pql.fraudcheck.exception.CorruptedDataException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,6 +13,10 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component("CARD_FREQUENCY")
 public class CardTransactionFrequencyRule implements IFraudDetection {
+
+    @Value("${fraud.check.rule.card.transactions.enabled:true}")
+    private boolean enabled;
+
 
     @Override
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
@@ -43,5 +48,10 @@ public class CardTransactionFrequencyRule implements IFraudDetection {
         }
 
         return new FraudRuleScore(fraudScore, message);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }

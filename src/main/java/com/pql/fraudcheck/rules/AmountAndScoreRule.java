@@ -25,6 +25,9 @@ import java.util.Locale;
 @Component("AMOUNT_SCORE")
 public class AmountAndScoreRule implements IFraudDetection {
 
+    @Value("${fraud.check.rule.amount.score.enabled:true}")
+    private boolean enabled;
+
     private final CurrencyConversion conversionForCalculation;
     private final FastMoney amountThreshold;
     private final MonetaryAmountFormat format;
@@ -42,6 +45,7 @@ public class AmountAndScoreRule implements IFraudDetection {
         );
     }
 
+    @Override
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
         checkForInvalidInput(transInfo);
 
@@ -64,6 +68,11 @@ public class AmountAndScoreRule implements IFraudDetection {
         }
 
         return new FraudRuleScore(fraudScore, message);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     private FastMoney calculateApplicableThreshold(Integer threatScore) {

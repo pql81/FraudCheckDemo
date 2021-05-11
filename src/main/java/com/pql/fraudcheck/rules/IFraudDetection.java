@@ -9,4 +9,6 @@ import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 public interface IFraudDetection {
 
     FraudRuleScore checkFraud(IncomingTransactionInfo transInfo);
+
+    boolean isEnabled();
 }

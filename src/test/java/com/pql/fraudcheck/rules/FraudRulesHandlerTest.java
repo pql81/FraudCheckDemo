@@ -38,6 +38,7 @@ public class FraudRulesHandlerTest {
         fraudRuleMap.put("DUMMY2", dummyRule2);
         fraudRuleMap.put("DUMMY3", dummyRule3);
 
+        fraudRuleMap.entrySet().forEach(e -> when(e.getValue().isEnabled()).thenReturn(true));
         when(dummyRule1.checkFraud(any())).thenReturn(new FraudRuleScore(0, null));
         when(dummyRule2.checkFraud(any())).thenReturn(new FraudRuleScore(50, "test1"));
         when(dummyRule3.checkFraud(any())).thenReturn(new FraudRuleScore(20, "test2"));

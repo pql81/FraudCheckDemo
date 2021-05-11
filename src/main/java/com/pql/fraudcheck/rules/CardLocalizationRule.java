@@ -3,6 +3,7 @@ package com.pql.fraudcheck.rules;
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,10 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component("CARD_LOCATION")
 public class CardLocalizationRule implements IFraudDetection {
+
+    @Value("${fraud.check.rule.card.localization.enabled:true}")
+    private boolean enabled;
+
 
     @Override
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
@@ -35,5 +40,10 @@ public class CardLocalizationRule implements IFraudDetection {
         }
 
         return new FraudRuleScore(fraudScore, message);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }
