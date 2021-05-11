@@ -16,6 +16,25 @@ $ git checkout master
 $ mvn spring-boot:run
 ```
 
+#### Running tests
+
+To run all tests:
+```shell
+$ cd FraudCheckDemo
+$ mvn clean && mvn test
+```
+
+Some legacy version of Intellij Idea could have issues running tests. If a `No tests were found` message is returned then add junit v4.12 dependency to the pom:
+
+```
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+</dependency>
+```
+
 #### Enable MTLS
 
 In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project
@@ -39,14 +58,6 @@ OpenAPI description can be found at http://localhost:8080/v3/api-docs/
 
 Testing API is possible at http://localhost:8080/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config
 The URL above works as API client to test applcition functionalities
-
-#### Running test for required use case
-
-To run all test:
-```shell
-$ cd FraudCheckDemo
-$ mvn test
-```
 
 #### Testing the service
 
