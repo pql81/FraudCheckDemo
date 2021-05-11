@@ -13,8 +13,6 @@ spring.jpa:
 spring.h2.console.enabled: true
 spring.jpa.open-in-view: false
 
-spring.security.user.password: test123
-
 server.error.include-message: always
 
 management.health:
