@@ -23,16 +23,10 @@ terminal.service.url: http://terminal-service:9091
 
 fraud.rule:
   amount.score:
-    enabled: true
     threshold.value: 1000
     threshold.currency: USD
   currency:
-#    enabled: false
     blacklist: AUD
-  card.localization.enabled: true
-  card.transactions.enabled: true
-  terminal.transactions.enabled: true
-  terminal.transactions.score.enabled: true
 
 fraud.card.transactions.range.hours: 24
 fraud.terminal.transactions.range.hours: 24

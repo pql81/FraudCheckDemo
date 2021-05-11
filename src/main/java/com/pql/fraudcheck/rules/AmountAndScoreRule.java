@@ -36,8 +36,8 @@ public class AmountAndScoreRule implements IFraudDetection {
     private final MonetaryAmountFormat format;
 
 
-    public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value}") int threshold,
-                              @Value("${fraud.rule.amount.score.threshold.currency}") String thresholdCurrency) {
+    public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value:10000}") Integer threshold,
+                              @Value("${fraud.rule.amount.score.threshold.currency:EUR}") String thresholdCurrency) {
         this.conversionForCalculation = MonetaryConversions.getConversion(thresholdCurrency);
         this.amountThreshold = FastMoney.of(threshold, thresholdCurrency);
 
