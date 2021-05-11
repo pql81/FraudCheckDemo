@@ -3,6 +3,7 @@ package com.pql.fraudcheck.rules;
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
 import com.pql.fraudcheck.exception.CorruptedDataException;
+import com.pql.fraudcheck.exception.CurrencyException;
 import lombok.extern.log4j.Log4j2;
 import org.javamoney.moneta.FastMoney;
 import org.javamoney.moneta.format.CurrencyStyle;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
+import javax.money.MonetaryException;
 import javax.money.convert.CurrencyConversion;
+import javax.money.convert.CurrencyConversionException;
 import javax.money.convert.MonetaryConversions;
 import javax.money.format.AmountFormatQueryBuilder;
 import javax.money.format.MonetaryAmountFormat;
@@ -24,6 +27,9 @@ import java.util.Locale;
 @Log4j2
 @Component("AMOUNT_SCORE")
 public class AmountAndScoreRule implements IFraudDetection {
+
+    @Value("${fraud.check.rule.amount.score.enabled:true}")
+    private boolean enabled;
 
     private final CurrencyConversion conversionForCalculation;
     private final FastMoney amountThreshold;
@@ -42,28 +48,45 @@ public class AmountAndScoreRule implements IFraudDetection {
         );
     }
 
-    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
+    @Override
+    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
         checkForInvalidInput(transInfo);
 
-        CurrencyUnit inputCurrency = Monetary.getCurrency(transInfo.getCurrency());
-        FastMoney amount = FastMoney.of(transInfo.getAmount(), inputCurrency);
+        try {
+            CurrencyUnit inputCurrency = Monetary.getCurrency(transInfo.getCurrency());
+            FastMoney amount = FastMoney.of(transInfo.getAmount(), inputCurrency);
 
-        log.info("Processing input amount::{}", format.format(amount));
+            log.info("Processing input amount::{}", format.format(amount));
 
-        FastMoney inputAmountNormalized = amount.with(conversionForCalculation);
-        FastMoney applicableThreshold = calculateApplicableThreshold(transInfo.getThreatScore());
+            FastMoney inputAmountNormalized = amount.with(conversionForCalculation);
+            FastMoney applicableThreshold = calculateApplicableThreshold(transInfo.getThreatScore());
 
-        log.info("Calculated threshold::{}", format.format(applicableThreshold));
+            log.info("Calculated threshold::{}", format.format(applicableThreshold));
 
-        Integer fraudScore = 0;
-        String message = null;
-        if (inputAmountNormalized.isGreaterThan(applicableThreshold)) {
-            message = "Transaction amount exceeds the upper limit for the terminal";
-            fraudScore = calculateFraudScore(transInfo.getThreatScore());
-            log.warn("{}::{}", message, format.format(inputAmountNormalized));
+            Integer fraudScore = 0;
+            String message = null;
+            if (inputAmountNormalized.isGreaterThan(applicableThreshold)) {
+                message = "Transaction amount exceeds the upper limit for the terminal";
+                fraudScore = calculateFraudScore(transInfo.getThreatScore());
+                log.warn("{}::{}", message, format.format(inputAmountNormalized));
+            }
+
+            return new FraudRuleScore(fraudScore, message);
+
+        } catch (MonetaryException ce) {
+            if (ce.getCause() instanceof CurrencyConversionException) {
+                log.error("Cannot convert currency [{}] for calculation", transInfo.getCurrency());
+                throw new CurrencyException("Cannot convert currency for calculation", ce);
+            } else {
+                log.error("Could not check request amount against threshold");
+                throw new CurrencyException("Could not check request amount against threshold", ce);
+            }
         }
+    }
 
-        return new FraudRuleScore(fraudScore, message);
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     private FastMoney calculateApplicableThreshold(Integer threatScore) {
