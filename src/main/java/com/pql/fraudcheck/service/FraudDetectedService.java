@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -62,6 +63,7 @@ public class FraudDetectedService {
 
     FraudDetected createFraudDetected(FraudCheckRequest request, FraudCheckResponse response) {
         FraudDetected fraud = new FraudDetected();
+        fraud.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
         fraud.setRequestId(MDC.get(REQUEST_ID_MDC));
         fraud.setAmount(request.getAmount());
         fraud.setCurrency(request.getCurrency());
