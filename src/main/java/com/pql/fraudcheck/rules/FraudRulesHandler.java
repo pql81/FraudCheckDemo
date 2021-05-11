@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Component
 public class FraudRulesHandler {
 
-    private final List<IFraudDetection> fraudRuleList;
+    private final List<IFraudDetection> applicableFraudRuleList;
 
     private final static Integer MIN_FRAUD_SCORE = 0;
     private final static Integer MAX_FRAUD_SCORE = 100;
@@ -29,14 +29,14 @@ public class FraudRulesHandler {
 
     public FraudRulesHandler(Map<String, IFraudDetection> fraudRuleMap) {
         // collect only enabled rules to List
-        this.fraudRuleList = fraudRuleMap.entrySet().stream()
+        this.applicableFraudRuleList = fraudRuleMap.entrySet().stream()
                 .filter(map -> map.getValue().isEnabled())
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
 
     public FraudCheckResponse checkIncomingTransaction(IncomingTransactionInfo transInfo) {
-        int rulesNum = fraudRuleList.size();
+        int rulesNum = applicableFraudRuleList.size();
         log.info("Checking fraud against {} rules", rulesNum);
 
         // not really a good scenario - log an alert
@@ -74,7 +74,7 @@ public class FraudRulesHandler {
     private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {
         List<FraudRuleScore> fraudScoreList = new ArrayList<>();
         MDCStreamHelper mdc = MDCStreamHelper.getCurrentMdc();
-        fraudRuleList.parallelStream()
+        applicableFraudRuleList.parallelStream()
                 .forEach(rule -> {
                         mdc.setMdc();
                         fraudScoreList.add(rule.checkFraud(transInfo));
