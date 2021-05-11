@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component("CARD_FREQUENCY")
 public class CardTransactionFrequencyRule implements IFraudDetection {
 
-    @Value("${fraud.check.rule.card.transactions.enabled:true}")
+    @Value("${fraud.rule.card.transactions.enabled:true}")
     private boolean enabled;
 
 
