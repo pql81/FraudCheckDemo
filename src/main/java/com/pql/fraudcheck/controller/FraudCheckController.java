@@ -6,7 +6,7 @@ import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.exception.CardPanException;
 import com.pql.fraudcheck.service.FraudDetectedService;
 import com.pql.fraudcheck.service.SimpleEncryptionService;
-import com.pql.fraudcheck.service.TransFraudService;
+import com.pql.fraudcheck.service.FraudCheckService;
 import com.pql.fraudcheck.util.LogHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.List;
 public class FraudCheckController {
 
     @Autowired
-    private TransFraudService transFraudService;
+    private FraudCheckService fraudCheckService;
 
     @Autowired
     private FraudDetectedService fraudDetectedService;
@@ -49,7 +49,7 @@ public class FraudCheckController {
             }
             request.setCardNumber(decryptedPan);
 
-            FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
+            FraudCheckResponse response = fraudCheckService.checkAllFraudRules(request);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
