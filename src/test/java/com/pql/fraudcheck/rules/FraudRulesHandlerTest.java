@@ -66,7 +66,7 @@ public class FraudRulesHandlerTest {
         IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 14, 20, 1.234, 1.234, 80, 1.11, 1.22);
 
         FraudCheckResponse response = fraudRulesHandler.checkIncomingTransaction(transInfo);
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertEquals(70,response.getFraudScore().intValue());
         assertTrue(response.getRejectionMessage().contains("test1"));
         assertTrue(response.getRejectionMessage().contains("test2"));
@@ -109,7 +109,7 @@ public class FraudRulesHandlerTest {
     public void testHandleInvalidTerminal() throws Exception {
         FraudCheckResponse response = fraudRulesHandler.handleInvalidTerminal();
 
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertEquals(100, response.getFraudScore().intValue());
         assertNotNull(response.getRejectionMessage());
     }

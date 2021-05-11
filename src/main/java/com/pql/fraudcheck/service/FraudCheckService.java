@@ -78,7 +78,7 @@ public class FraudCheckService {
         }
 
         // if fraud is detected then save it to the DB
-        if (response.getRejectionStatus() == FraudCheckResponse.RejStatus.DENIED) {
+        if (response.getRejectionStatus() == FraudCheckResponse.RejStatus.REJECTED) {
             fraudDetectedService.saveFraud(request, response);
         }
 
