@@ -69,7 +69,7 @@ public class FraudCheckServiceTest {
 
     @Test
     public void testCheckAllFraudRulesDeny() throws Exception {
-        when(fraudRulesHandler.checkIncomingTransaction(any())).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Test", 10));
+        when(fraudRulesHandler.checkIncomingTransaction(any())).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, "Test", 10));
 
         FraudCheckRequest request = getFraudCheckRequestForTest();
 
@@ -78,7 +78,7 @@ public class FraudCheckServiceTest {
         Mockito.verify(dummyCardServiceCaller, Mockito.times(1)).getCardUsage(eq("5555555555554444"), eq(12));
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(1)).getTerminalLastTransactions(eq("T001"), eq(48));
 
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertNotNull(response.getRejectionMessage());
 
         Mockito.verify(fraudDetectedService, Mockito.times(1)).saveFraud(any(), any());
@@ -93,7 +93,7 @@ public class FraudCheckServiceTest {
 
         when(dummyTerminalServiceCaller.getTerminalLocation(startsWith("T"))).thenReturn(future1);
         when(dummyTerminalServiceCaller.getTerminalLastTransactions(startsWith("T"), any())).thenReturn(future2);
-        when(fraudRulesHandler.handleInvalidTerminal()).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Test", 50));
+        when(fraudRulesHandler.handleInvalidTerminal()).thenReturn(new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, "Test", 50));
 
         FraudCheckRequest request = getFraudCheckRequestForTest();
 
@@ -102,7 +102,7 @@ public class FraudCheckServiceTest {
         Mockito.verify(dummyCardServiceCaller, Mockito.times(1)).getCardUsage(eq("5555555555554444"), eq(12));
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(1)).getTerminalLastTransactions(eq("T001"), eq(48));
 
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertNotNull(response.getRejectionMessage());
 
         Mockito.verify(fraudDetectedService, Mockito.times(1)).saveFraud(any(), any());

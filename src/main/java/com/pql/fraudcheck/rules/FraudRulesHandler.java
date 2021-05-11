@@ -23,6 +23,9 @@ public class FraudRulesHandler {
 
     private final List<IFraudDetection> fraudRuleList;
 
+    private final static Integer MIN_FRAUD_SCORE = 0;
+    private final static Integer MAX_FRAUD_SCORE = 100;
+
 
     public FraudRulesHandler(Map<String, IFraudDetection> fraudRuleMap) {
         // collect only enabled rules to List
@@ -49,10 +52,11 @@ public class FraudRulesHandler {
             Integer fraudScore = getScore(fraudScoreList);
 
             if (fraudScore > 0) {
+                fraudScore = fraudScore > MAX_FRAUD_SCORE ? MAX_FRAUD_SCORE : fraudScore; // fraud score cannot exceed 100
                 log.info("Total fraud score calculated::{}", fraudScore);
-                return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, messages, fraudScore > 100 ? 100 : fraudScore);
+                return new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, messages, fraudScore);
             } else {
-                return new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, 0);
+                return new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, MIN_FRAUD_SCORE);
             }
 
         } catch (CurrencyException ce) {
@@ -64,7 +68,7 @@ public class FraudRulesHandler {
     }
 
     public FraudCheckResponse handleInvalidTerminal() {
-        return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Invalid terminal", 100);
+        return new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, "Invalid terminal", MAX_FRAUD_SCORE);
     }
 
     private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {

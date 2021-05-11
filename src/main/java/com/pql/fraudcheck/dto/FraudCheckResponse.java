@@ -10,7 +10,7 @@ public class FraudCheckResponse {
 
     public enum RejStatus {
         ALLOWED,
-        DENIED
+        REJECTED
     }
 
     private final RejStatus rejectionStatus;

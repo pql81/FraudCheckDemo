@@ -87,6 +87,6 @@ public class FraudDetectedServiceTest {
     }
 
     private FraudCheckResponse getFraudCheckResponseForTest() {
-        return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "test1;test2", 30);
+        return new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, "test1;test2", 30);
     }
 }
