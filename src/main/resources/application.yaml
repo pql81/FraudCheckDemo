@@ -13,15 +13,13 @@ spring.jpa:
 spring.h2.console.enabled: true
 spring.jpa.open-in-view: false
 
-spring.security.user.password: test123
-
 server.error.include-message: always
 
 management.health:
   circuitbreakers.enabled: true
   circuitbreakerevents.enabled: true
   ratelimiters.enabled: true
-management.endpoints.web.exposure.include: health,info,metrics,circuitbreakers,circuitbreakerevents,ratelimiters
+management.endpoints.web.exposure.include: health,info,metrics,circuitbreakers,circuitbreakerevents,ratelimiters,httptrace
 
 thread.pool.core.size: 10
 thread.pool.max.size: 50
