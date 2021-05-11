@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Log4j2
 @Service
-public class TransFraudService {
+public class FraudCheckService {
 
     @Autowired
     private DummyCardServiceCaller dummyCardServiceCaller;
@@ -42,7 +42,7 @@ public class TransFraudService {
     private final int terminalTransHoursRange;
 
 
-    public TransFraudService(@Value("${fraud.card.transactions.range.hours}") int cardTransHoursRange,
+    public FraudCheckService(@Value("${fraud.card.transactions.range.hours}") int cardTransHoursRange,
                              @Value("${fraud.terminal.transactions.range.hours}") int terminalTransHoursRange) {
         this.cardTransHoursRange = cardTransHoursRange;
         this.terminalTransHoursRange = terminalTransHoursRange;

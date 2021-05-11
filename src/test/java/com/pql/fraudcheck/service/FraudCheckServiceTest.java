@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
  * Created by pasqualericupero on 06/05/2021.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TransFraudServiceTest {
+public class FraudCheckServiceTest {
 
     @Mock
     FraudDetectedService fraudDetectedService;
@@ -40,7 +40,7 @@ public class TransFraudServiceTest {
     FraudRulesHandler fraudRulesHandler;
 
     @InjectMocks
-    TransFraudService transFraudService = new TransFraudService(12, 48);
+    FraudCheckService fraudCheckService = new FraudCheckService(12, 48);
 
 
     @Before
@@ -56,7 +56,7 @@ public class TransFraudServiceTest {
     public void testCheckAllFraudRulesAllow() throws Exception {
         FraudCheckRequest request = getFraudCheckRequestForTest();
 
-        FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
+        FraudCheckResponse response = fraudCheckService.checkAllFraudRules(request);
 
         Mockito.verify(dummyCardServiceCaller, Mockito.times(1)).getCardUsage(eq("5555555555554444"), eq(12));
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(1)).getTerminalLastTransactions(eq("T001"), eq(48));
@@ -73,7 +73,7 @@ public class TransFraudServiceTest {
 
         FraudCheckRequest request = getFraudCheckRequestForTest();
 
-        FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
+        FraudCheckResponse response = fraudCheckService.checkAllFraudRules(request);
 
         Mockito.verify(dummyCardServiceCaller, Mockito.times(1)).getCardUsage(eq("5555555555554444"), eq(12));
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(1)).getTerminalLastTransactions(eq("T001"), eq(48));
@@ -97,7 +97,7 @@ public class TransFraudServiceTest {
 
         FraudCheckRequest request = getFraudCheckRequestForTest();
 
-        FraudCheckResponse response = transFraudService.checkAllFraudRules(request);
+        FraudCheckResponse response = fraudCheckService.checkAllFraudRules(request);
 
         Mockito.verify(dummyCardServiceCaller, Mockito.times(1)).getCardUsage(eq("5555555555554444"), eq(12));
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(1)).getTerminalLastTransactions(eq("T001"), eq(48));
@@ -116,7 +116,7 @@ public class TransFraudServiceTest {
         request.setCardNumber("5555555555554444");
         request.setTerminalId("T001");
 
-        transFraudService.checkAllFraudRules(request);
+        fraudCheckService.checkAllFraudRules(request);
 
         Mockito.verify(dummyCardServiceCaller, Mockito.times(0)).getCardUsage(anyString(), anyInt());
         Mockito.verify(dummyTerminalServiceCaller, Mockito.times(0)).getTerminalLastTransactions(anyString(), anyInt());
