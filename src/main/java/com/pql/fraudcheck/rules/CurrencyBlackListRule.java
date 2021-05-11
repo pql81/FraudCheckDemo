@@ -34,6 +34,8 @@ public class CurrencyBlackListRule implements IFraudDetection {
 
     @Override
     public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
+        log.info("Processing currency against blacklist::{}", transInfo.getCurrency());
+
         int fraudScore = 0;
         String message = null;
 
