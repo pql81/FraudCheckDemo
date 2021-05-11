@@ -35,23 +35,45 @@ public class AmountAndScoreRule implements IFraudDetection {
     private final FastMoney amountThreshold;
     private final MonetaryAmountFormat format;
 
+    private final static Integer FALLBACK_THRESHOLD_AMOUNT = 10000;
+    private final static String FALLBACK_THRESHOLD_CURRENCY = "EUR";
 
-    public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value:10000}") Integer threshold,
-                              @Value("${fraud.rule.amount.score.threshold.currency:EUR}") String thresholdCurrency) {
+
+    public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value:}") Integer threshold,
+                              @Value("${fraud.rule.amount.score.threshold.currency:}") String thresholdCurrency) {
         CurrencyConversion currencyConversion;
-        String currencyString = thresholdCurrency;
-        try {
-            currencyConversion = MonetaryConversions.getConversion(thresholdCurrency);
-        } catch (Exception e) {
-            // fallback
-            log.error("PLEASE CHECK YOU CONFIGURATION - UNRECOGNIZED THRESHOLD CURRENCY!");
-            currencyString = "EUR";
-            currencyConversion = MonetaryConversions.getConversion(currencyString);
-            log.warn("AmountAndScoreRule fallback: threshold currency to EUR");
+        Integer configThreshold;
+        String configCurrency;
+
+        if (threshold == null || threshold < 0 || thresholdCurrency.isEmpty()) {
+            configThreshold = FALLBACK_THRESHOLD_AMOUNT;
+            configCurrency = FALLBACK_THRESHOLD_CURRENCY;
+            log.warn("AmountAndScoreRule: no configuration found or empty values - loading default threshold::{} {}",
+                    configThreshold, configCurrency);
+
+            // shouldn't have problem to get MonetaryConversion here - fallback currency
+            currencyConversion = MonetaryConversions.getConversion(configCurrency);
+        } else {
+            try {
+                currencyConversion = MonetaryConversions.getConversion(thresholdCurrency);
+
+                // ok good to go!
+                configThreshold = threshold;
+                configCurrency = thresholdCurrency;
+
+                log.info("AmountAndScoreRule: loading threshold::{} {}", configThreshold, configCurrency);
+            } catch (Exception e) {
+                // fallback
+                log.error("AmountAndScoreRule: PLEASE CHECK YOU CONFIGURATION - UNRECOGNIZED THRESHOLD CURRENCY::{}", thresholdCurrency);
+                configThreshold = FALLBACK_THRESHOLD_AMOUNT;
+                configCurrency = FALLBACK_THRESHOLD_CURRENCY;
+                currencyConversion = MonetaryConversions.getConversion(configCurrency);
+                log.warn("AmountAndScoreRule: fallback to default threshold::{} {}", configThreshold, configCurrency);
+            }
         }
 
         this.conversionForCalculation = currencyConversion;
-        this.amountThreshold = FastMoney.of(threshold, currencyString);
+        this.amountThreshold = FastMoney.of(configThreshold, configCurrency);
 
         this.format = MonetaryFormats.getAmountFormat(
                 AmountFormatQueryBuilder.of(Locale.ITALY) // it's just the way to display amount and currency
