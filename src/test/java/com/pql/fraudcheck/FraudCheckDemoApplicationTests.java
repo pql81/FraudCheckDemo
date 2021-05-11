@@ -114,6 +114,18 @@ public class FraudCheckDemoApplicationTests {
     }
 
     @Test
+    public void testFraudCheckDeniedBlacklistedCurrency() throws Exception {
+
+        mockMvc.perform(post("/fraud-check")
+                .content("{\"amount\":600,\"currency\":\"AUD\",\"terminalId\":\"T0100\",\"threatScore\":10,\"cardNumber\":\"gbgkB1su1FwtCityUQo6ofwMMsMik9/jvjcIwWIobCE=\"}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rejectionStatus").value(FraudCheckResponse.RejStatus.DENIED.name()))
+                .andExpect(jsonPath("$.rejectionMessage").value("Transaction currency not allowed"))
+                .andExpect(jsonPath("$.fraudScore").value(75));
+    }
+
+    @Test
     public void testFraudCheckDeniedCurrencyFormat() throws Exception {
 
         mockMvc.perform(post("/fraud-check")
