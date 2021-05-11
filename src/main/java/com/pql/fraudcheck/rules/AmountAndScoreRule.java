@@ -114,7 +114,7 @@ public class AmountAndScoreRule implements IFraudDetection {
     private void checkForInvalidInput(IncomingTransactionInfo info) {
         if (info.getThreatScore() < 0 || info.getAmount() < 0) {
             // it shouldn't happen as input data is validated at controller level
-            log.warn("Data corrupted during fraud check process");
+            log.error("Data corrupted during fraud check process");
             throw new CorruptedDataException("Corrupted data in input");
         }
     }
