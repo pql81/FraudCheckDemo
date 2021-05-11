@@ -25,6 +25,12 @@ public class AmountAndScoreRuleTest {
     }
 
     @Test
+    public void testAmountAndScoreRuleBadThresholdCurrency() throws Exception {
+        AmountAndScoreRule rule = new AmountAndScoreRule(500, "ABC");
+        assertNotNull(rule.checkFraud(new IncomingTransactionInfo(250.40, "EUR", 30, 19, 1.234, 1.234, 78, 1.234, 1.234)));
+    }
+
+    @Test
     public void testCheckFraudScore5() throws Exception {
         int threatScore = 5;
 

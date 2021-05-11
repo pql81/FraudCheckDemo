@@ -38,8 +38,20 @@ public class AmountAndScoreRule implements IFraudDetection {
 
     public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value:10000}") Integer threshold,
                               @Value("${fraud.rule.amount.score.threshold.currency:EUR}") String thresholdCurrency) {
-        this.conversionForCalculation = MonetaryConversions.getConversion(thresholdCurrency);
-        this.amountThreshold = FastMoney.of(threshold, thresholdCurrency);
+        CurrencyConversion currencyConversion;
+        String currencyString = thresholdCurrency;
+        try {
+            currencyConversion = MonetaryConversions.getConversion(thresholdCurrency);
+        } catch (Exception e) {
+            // fallback
+            log.error("PLEASE CHECK YOU CONFIGURATION - UNRECOGNIZED THRESHOLD CURRENCY!");
+            currencyString = "EUR";
+            currencyConversion = MonetaryConversions.getConversion(currencyString);
+            log.warn("AmountAndScoreRule fallback: threshold currency to EUR");
+        }
+
+        this.conversionForCalculation = currencyConversion;
+        this.amountThreshold = FastMoney.of(threshold, currencyString);
 
         this.format = MonetaryFormats.getAmountFormat(
                 AmountFormatQueryBuilder.of(Locale.ITALY) // it's just the way to display amount and currency
