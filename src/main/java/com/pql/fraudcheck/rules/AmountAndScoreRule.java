@@ -49,7 +49,7 @@ public class AmountAndScoreRule implements IFraudDetection {
     }
 
     @Override
-    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
+    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
         checkForInvalidInput(transInfo);
 
         try {

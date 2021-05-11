@@ -2,6 +2,8 @@ package com.pql.fraudcheck.rules;
 
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
+import com.pql.fraudcheck.exception.CorruptedDataException;
+import com.pql.fraudcheck.exception.CurrencyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +20,7 @@ public class CardLocalizationRule implements IFraudDetection {
 
 
     @Override
-    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) {
+    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
         log.info("Processing card recent location against terminal");
 
         Integer fraudScore = 0;
