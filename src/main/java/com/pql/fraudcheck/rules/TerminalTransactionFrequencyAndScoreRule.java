@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component("TRANS_FREQUENCY_SCORE")
 public class TerminalTransactionFrequencyAndScoreRule implements IFraudDetection {
 
-    @Value("${fraud.check.rule.terminal.transactions.score.enabled:true}")
+    @Value("${fraud.rule.terminal.transactions.score.enabled:true}")
     private boolean enabled;
 
 

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component("CARD_LOCATION")
 public class CardLocalizationRule implements IFraudDetection {
 
-    @Value("${fraud.check.rule.card.localization.enabled:true}")
+    @Value("${fraud.rule.card.localization.enabled:true}")
     private boolean enabled;
 
 

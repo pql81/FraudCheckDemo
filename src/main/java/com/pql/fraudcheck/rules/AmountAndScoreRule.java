@@ -28,7 +28,7 @@ import java.util.Locale;
 @Component("AMOUNT_SCORE")
 public class AmountAndScoreRule implements IFraudDetection {
 
-    @Value("${fraud.check.rule.amount.score.enabled:true}")
+    @Value("${fraud.rule.amount.score.enabled:true}")
     private boolean enabled;
 
     private final CurrencyConversion conversionForCalculation;
@@ -36,8 +36,8 @@ public class AmountAndScoreRule implements IFraudDetection {
     private final MonetaryAmountFormat format;
 
 
-    public AmountAndScoreRule(@Value("${fraud.amount.threshold.value}") int threshold,
-                              @Value("${fraud.amount.threshold.currency}") String thresholdCurrency) {
+    public AmountAndScoreRule(@Value("${fraud.rule.amount.score.threshold.value}") int threshold,
+                              @Value("${fraud.rule.amount.score.threshold.currency}") String thresholdCurrency) {
         this.conversionForCalculation = MonetaryConversions.getConversion(thresholdCurrency);
         this.amountThreshold = FastMoney.of(threshold, thresholdCurrency);
 

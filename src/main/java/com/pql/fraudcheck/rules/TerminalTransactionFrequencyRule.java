@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component("TRANS_FREQUENCY")
 public class TerminalTransactionFrequencyRule implements IFraudDetection {
 
-    @Value("${fraud.check.rule.terminal.transactions.enabled:true}")
+    @Value("${fraud.rule.terminal.transactions.enabled:true}")
     private boolean enabled;
 
 
