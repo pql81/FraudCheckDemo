@@ -65,3 +65,35 @@ As card numbers are expected to be send encrypted, here is a list of valid value
 
 Running test SimpleEncryptionServiceTest will display a list of card and their encrypted values.
 
+#### Adding a new fraud rule
+
+Adding a new fraud rule to fraud check service is pretty straight forward, simply follow the steps:
+- Create a new class in ```com.pql.fraudcheck.rules``` package implementing ```IFraudDetection```
+- Implement both methods ```FraudRuleScore checkFraud(IncomingTransactionInfo transInfo)``` and ```boolean isEnabled()```
+- Place the rule logic in `checkFraud` method and return a `FraudRuleScore` object accordingly
+- Annotate the new class with ```@Component("<NEW_RULE_NAME>")```. Name can be arbitrary but it has to be unique within other fraud rule components
+
+This is how the new rule class looks like:
+```java
+@Component("MY_NEW_RULE")
+public class MyNewRule implements IFraudDetection {
+
+    @Override
+    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
+        FraudRuleScore fraudRuleScore;
+        // rule logic here
+
+        return fraudRuleScore;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        boolean enabled;
+        // logic here
+
+        return enabled;
+    }
+}
+```
+
+Done! Spring Boot will instantiate the new component automatically and put it in the fraud rule `Map` for constructor injection in ```FraudRulesHandler```. Then the new rule will be added to the `applicableFraudRuleList` and run only if its `isEnabled()` method returns `true`.
