@@ -69,9 +69,9 @@ public class FraudCheckService {
             } else {
                 throw new FraudCheckException("Unable to verify the transaction", ce.getCause());
             }
-        } catch (FraudCheckException fce) {
+        } catch (FraudCheckException | CurrencyException ce) {
             // fraudRulesHandler already managed the exception
-            throw fce;
+            throw ce;
         } catch (Exception e) {
             log.error("Unexpected error", e);
             throw new RuntimeException("Unexpected error", e);

@@ -3,6 +3,7 @@ package com.pql.fraudcheck.rules;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
+import com.pql.fraudcheck.exception.CurrencyException;
 import com.pql.fraudcheck.exception.FraudCheckException;
 import com.pql.fraudcheck.util.MDCStreamHelper;
 import lombok.extern.log4j.Log4j2;
@@ -54,6 +55,8 @@ public class FraudRulesHandler {
                 return new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, 0);
             }
 
+        } catch (CurrencyException ce) {
+            throw ce;
         } catch (Exception e) {
             log.error("An unexpected error occurred during fraud score calculation!", e);
             throw new FraudCheckException("An unexpected error occurred during fraud score calculation", e);
