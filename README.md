@@ -37,7 +37,9 @@ Some legacy version of Intellij Idea could have issues running tests. If a `No t
 
 #### Enable MTLS
 
-In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project
+In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project.
+
+Please notice that certificates and keys are included in this repo **for test purpose and they shouldn't be used in a production environment**.
 
 ```shell
 $ mvn spring-boot:run -Dspring-boot.run.profiles=mtls
