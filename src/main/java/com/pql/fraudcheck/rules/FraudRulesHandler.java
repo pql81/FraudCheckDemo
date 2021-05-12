@@ -72,15 +72,12 @@ public class FraudRulesHandler {
     }
 
     private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {
-        List<FraudRuleScore> fraudScoreList = new ArrayList<>();
         MDCStreamHelper mdc = MDCStreamHelper.getCurrentMdc();
-        applicableFraudRuleList.parallelStream()
-                .forEach(rule -> {
-                        mdc.setMdc();
-                        fraudScoreList.add(rule.checkFraud(transInfo));
-                });
 
-        return fraudScoreList;
+        return applicableFraudRuleList.parallelStream()
+                .peek(i -> mdc.setMdc())
+                .map(rule -> rule.checkFraud(transInfo))
+                .collect(Collectors.toList());
     }
 
     private String getMessage(List<FraudRuleScore> fraudScoreList) {
