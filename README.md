@@ -39,7 +39,7 @@ Some legacy version of Intellij Idea could have issues running tests. If a `No t
 
 In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project.
 
-Please notice that certificates and keys are included in this repo **for test purpose and they shouldn't be used in a production environment**.
+Please notice that certificates and keys are included in this repo **for test purpose only and they shouldn't be used in a production environment**.
 
 ```shell
 $ mvn spring-boot:run -Dspring-boot.run.profiles=mtls
@@ -51,7 +51,7 @@ Alternatively curl can be used to send a request:
 
 ```shell
 $ cd FraudCheckDemo/src/main/resources/keystore/client
-$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=\"}" --cert ./client/client.cer --key ./client/client_key.pem --insecure
+$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=\"}" --cert ./client.cer --key ./client_key.pem --insecure
 ```
 
 #### OpenAPI documetation and UI test
