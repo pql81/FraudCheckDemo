@@ -51,7 +51,7 @@ public class FraudCheckService {
     public FraudCheckResponse checkAllFraudRules(FraudCheckRequest request) {
         log.info("Started fraud check for cardNumber::{} and terminalId::{}", CardUtil.getMaskedPan(request.getCardNumber()), request.getTerminalId());
 
-        // if currency is invalid there is no need to proceed
+        // why this check here? if currency is invalid then there is no need to proceed, return 422 and save time
         checkCurrency(request.getCurrency());
 
         FraudCheckResponse response;
@@ -69,16 +69,16 @@ public class FraudCheckService {
             } else {
                 throw new FraudCheckException("Unable to verify the transaction", ce.getCause());
             }
-        } catch (FraudCheckException fce) {
+        } catch (FraudCheckException | CurrencyException ce) {
             // fraudRulesHandler already managed the exception
-            throw fce;
+            throw ce;
         } catch (Exception e) {
             log.error("Unexpected error", e);
             throw new RuntimeException("Unexpected error", e);
         }
 
         // if fraud is detected then save it to the DB
-        if (response.getRejectionStatus() == FraudCheckResponse.RejStatus.DENIED) {
+        if (response.getRejectionStatus() == FraudCheckResponse.RejStatus.REJECTED) {
             fraudDetectedService.saveFraud(request, response);
         }
 

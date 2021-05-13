@@ -38,6 +38,7 @@ public class FraudRulesHandlerTest {
         fraudRuleMap.put("DUMMY2", dummyRule2);
         fraudRuleMap.put("DUMMY3", dummyRule3);
 
+        fraudRuleMap.entrySet().forEach(e -> when(e.getValue().isEnabled()).thenReturn(true));
         when(dummyRule1.checkFraud(any())).thenReturn(new FraudRuleScore(0, null));
         when(dummyRule2.checkFraud(any())).thenReturn(new FraudRuleScore(50, "test1"));
         when(dummyRule3.checkFraud(any())).thenReturn(new FraudRuleScore(20, "test2"));
@@ -47,8 +48,8 @@ public class FraudRulesHandlerTest {
 
     @Test
     public void testCheckIncomingTransactionAllowed() throws Exception {
-        when(dummyRule2.checkFraud(any())).thenReturn(new FraudRuleScore(0, null));
-        when(dummyRule3.checkFraud(any())).thenReturn(new FraudRuleScore(0, null));
+        fraudRuleMap.entrySet().forEach(e -> when(e.getValue().checkFraud(any())).thenReturn(new FraudRuleScore(0, null)));
+
         IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 14, 20, 1.234, 1.234, 80, 1.11, 1.22);
 
         FraudCheckResponse response = fraudRulesHandler.checkIncomingTransaction(transInfo);
@@ -65,7 +66,7 @@ public class FraudRulesHandlerTest {
         IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 14, 20, 1.234, 1.234, 80, 1.11, 1.22);
 
         FraudCheckResponse response = fraudRulesHandler.checkIncomingTransaction(transInfo);
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertEquals(70,response.getFraudScore().intValue());
         assertTrue(response.getRejectionMessage().contains("test1"));
         assertTrue(response.getRejectionMessage().contains("test2"));
@@ -74,9 +75,31 @@ public class FraudRulesHandlerTest {
                 Mockito.verify(fraudRuleMap.get(rule.getKey()), Mockito.times(1)).checkFraud(any()));
     }
 
+    @Test
+    public void testCheckIncomingTransactionRuleDisabled() throws Exception {
+        when(dummyRule2.isEnabled()).thenReturn(false);
+        when(dummyRule3.isEnabled()).thenReturn(false);
+
+        // need to create a new FraudRulesHandler object to load a different rule map in the constructor
+        FraudRulesHandler fraudRulesHandlerOneRule = new FraudRulesHandler(fraudRuleMap);
+
+        IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 14, 20, 1.234, 1.234, 80, 1.11, 1.22);
+
+        FraudCheckResponse response = fraudRulesHandlerOneRule.checkIncomingTransaction(transInfo);
+        assertEquals(FraudCheckResponse.RejStatus.ALLOWED, response.getRejectionStatus());
+        assertEquals(0, response.getFraudScore().intValue());
+        assertNull(response.getRejectionMessage());
+
+        fraudRuleMap.entrySet().stream().forEach(rule -> {
+                int times = rule.getValue() == dummyRule1 ? 1 : 0;
+                Mockito.verify(fraudRuleMap.get(rule.getKey()), Mockito.times(times)).checkFraud(any());
+        });
+    }
+
     @Test(expected = FraudCheckException.class)
     public void testCheckIncomingTransactionError() throws Exception {
         when(dummyRule3.checkFraud(any())).thenThrow(new ArithmeticException());
+
         IncomingTransactionInfo transInfo = new IncomingTransactionInfo(200.00, "EUR", 101, 20, 1.234, 1.234, 80, 1.11, 1.22);
 
         fraudRulesHandler.checkIncomingTransaction(transInfo);
@@ -86,7 +109,7 @@ public class FraudRulesHandlerTest {
     public void testHandleInvalidTerminal() throws Exception {
         FraudCheckResponse response = fraudRulesHandler.handleInvalidTerminal();
 
-        assertEquals(FraudCheckResponse.RejStatus.DENIED, response.getRejectionStatus());
+        assertEquals(FraudCheckResponse.RejStatus.REJECTED, response.getRejectionStatus());
         assertEquals(100, response.getFraudScore().intValue());
         assertNotNull(response.getRejectionMessage());
     }

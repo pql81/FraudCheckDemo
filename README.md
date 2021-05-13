@@ -16,9 +16,30 @@ $ git checkout master
 $ mvn spring-boot:run
 ```
 
+#### Running tests
+
+To run all tests:
+```shell
+$ cd FraudCheckDemo
+$ mvn clean && mvn test
+```
+
+Some legacy version of Intellij Idea could have issues running tests. If a `No tests were found` message is returned then add junit v4.12 dependency to the pom:
+
+```
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+</dependency>
+```
+
 #### Enable MTLS
 
-In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project
+In order to enable mutual TLS it is possible to select mtls profile. Client cert and key is available in resources/keystore/client folder in the project.
+
+Please notice that certificates and keys are included in this repo **for test purpose only and they shouldn't be used in a production environment**.
 
 ```shell
 $ mvn spring-boot:run -Dspring-boot.run.profiles=mtls
@@ -30,7 +51,7 @@ Alternatively curl can be used to send a request:
 
 ```shell
 $ cd FraudCheckDemo/src/main/resources/keystore/client
-$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=\"}" --cert ./client/client.cer --key ./client/client_key.pem --insecure
+$ curl -X POST "https://localhost:8443/fraud-check" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"amount\":20,\"currency\":\"EUR\",\"terminalId\":\"T-002\",\"threatScore\":10,\"cardNumber\":\"KCybCt7X9r2kk83zSl0w5j+EkCkLySNxf5Jhier8Cz4=\"}" --cert ./client.cer --key ./client_key.pem --insecure
 ```
 
 #### OpenAPI documetation and UI test
@@ -39,14 +60,6 @@ OpenAPI description can be found at http://localhost:8080/v3/api-docs/
 
 Testing API is possible at http://localhost:8080/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config
 The URL above works as API client to test applcition functionalities
-
-#### Running test for required use case
-
-To run all test:
-```shell
-$ cd FraudCheckDemo
-$ mvn test
-```
 
 #### Testing the service
 
@@ -65,3 +78,35 @@ As card numbers are expected to be send encrypted, here is a list of valid value
 
 Running test SimpleEncryptionServiceTest will display a list of card and their encrypted values.
 
+#### Adding a new fraud rule
+
+Adding a new fraud rule to fraud check service is pretty straight forward, simply follow the steps:
+- Create a new class in ```com.pql.fraudcheck.rules``` package implementing ```IFraudDetection```
+- Implement both methods ```FraudRuleScore checkFraud(IncomingTransactionInfo transInfo)``` and ```boolean isEnabled()```
+- Place the rule logic in `checkFraud` method and return a `FraudRuleScore` object accordingly
+- Annotate the new class with ```@Component("<NEW_RULE_NAME>")```. Name can be arbitrary but it has to be unique within other fraud rule components
+
+This is how the new rule class looks like:
+```java
+@Component("MY_NEW_RULE")
+public class MyNewRule implements IFraudDetection {
+
+    @Override
+    public FraudRuleScore checkFraud(IncomingTransactionInfo transInfo) throws CurrencyException, CorruptedDataException {
+        FraudRuleScore fraudRuleScore;
+        // rule logic here
+
+        return fraudRuleScore;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        boolean enabled;
+        // logic here
+
+        return enabled;
+    }
+}
+```
+
+Done! Spring Boot will instantiate the new component automatically and put it in the fraud rule `Map` for constructor injection in ```FraudRulesHandler```. Then the new rule will be added to the `applicableFraudRuleList` and run only if its `isEnabled()` method returns `true`.

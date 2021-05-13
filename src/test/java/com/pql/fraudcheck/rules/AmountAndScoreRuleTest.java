@@ -25,6 +25,24 @@ public class AmountAndScoreRuleTest {
     }
 
     @Test
+    public void testAmountAndScoreRuleBadThresholdAmount() throws Exception {
+        AmountAndScoreRule rule = new AmountAndScoreRule(null, "USD");
+        assertNotNull(rule.checkFraud(getIncomingTransactionInfoForTest(250.50, 30)));
+
+        rule = new AmountAndScoreRule(-120, "USD");
+        assertNotNull(rule.checkFraud(getIncomingTransactionInfoForTest(250.50, 30)));
+    }
+
+    @Test
+    public void testAmountAndScoreRuleBadThresholdCurrency() throws Exception {
+        AmountAndScoreRule rule = new AmountAndScoreRule(500, "");
+        assertNotNull(rule.checkFraud(getIncomingTransactionInfoForTest(250.50, 30)));
+
+        rule = new AmountAndScoreRule(500, "ABC");
+        assertNotNull(rule.checkFraud(getIncomingTransactionInfoForTest(250.50, 30)));
+    }
+
+    @Test
     public void testCheckFraudScore5() throws Exception {
         int threatScore = 5;
 
@@ -110,7 +128,10 @@ public class AmountAndScoreRuleTest {
     }
 
     private FraudRuleScore getFraudScore(double amount, int threatScore) {
-        IncomingTransactionInfo transInfo = new IncomingTransactionInfo(amount, "EUR", threatScore, 19, 1.234, 1.234, 78, 1.234, 1.234);
-        return amountAndScoreRule.checkFraud(transInfo);
+        return amountAndScoreRule.checkFraud(getIncomingTransactionInfoForTest(amount, threatScore));
+    }
+
+    private IncomingTransactionInfo getIncomingTransactionInfoForTest(double amount, int threatScore) {
+        return new IncomingTransactionInfo(amount, "EUR", threatScore, 19, 1.234, 1.234, 78, 1.234, 1.234);
     }
 }

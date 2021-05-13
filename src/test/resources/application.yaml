@@ -23,8 +23,13 @@ rest.template.read.timeout.millis: 100
 card.service.url: https://card-service:9090
 terminal.service.url: http://terminal-service:9091
 
-fraud.amount.threshold.value: 1000
-fraud.amount.threshold.currency: USD
+fraud.rule:
+  amount.score:
+    threshold.value: 1000
+    threshold.currency: USD
+  currency:
+    blacklist: AUD
+
 fraud.card.transactions.range.hours: 24
 fraud.terminal.transactions.range.hours: 24
 

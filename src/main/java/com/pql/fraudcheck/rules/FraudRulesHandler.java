@@ -3,6 +3,7 @@ package com.pql.fraudcheck.rules;
 import com.pql.fraudcheck.dto.FraudCheckResponse;
 import com.pql.fraudcheck.dto.FraudRuleScore;
 import com.pql.fraudcheck.dto.IncomingTransactionInfo;
+import com.pql.fraudcheck.exception.CurrencyException;
 import com.pql.fraudcheck.exception.FraudCheckException;
 import com.pql.fraudcheck.util.MDCStreamHelper;
 import lombok.extern.log4j.Log4j2;
@@ -20,15 +21,28 @@ import java.util.stream.Collectors;
 @Component
 public class FraudRulesHandler {
 
-    private final Map<String, IFraudDetection> fraudRuleMap;
+    private final List<IFraudDetection> applicableFraudRuleList;
+
+    private final static Integer MIN_FRAUD_SCORE = 0;
+    private final static Integer MAX_FRAUD_SCORE = 100;
 
 
     public FraudRulesHandler(Map<String, IFraudDetection> fraudRuleMap) {
-        this.fraudRuleMap = fraudRuleMap;
+        // collect only enabled rules to List
+        this.applicableFraudRuleList = fraudRuleMap.entrySet().stream()
+                .filter(map -> map.getValue().isEnabled())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     public FraudCheckResponse checkIncomingTransaction(IncomingTransactionInfo transInfo) {
-        log.info("Checking fraud against {} rules", fraudRuleMap.size());
+        int rulesNum = applicableFraudRuleList.size();
+        log.info("Checking fraud against {} rules", rulesNum);
+
+        // not really a good scenario - log an alert
+        if (rulesNum == 0) {
+            log.warn("RUNNING FRAUD CHECK WITH NO RULE ENABLED! PLEASE CHECK CONFIGURATION");
+        }
 
         try {
             // fraud check in parallel between available rules (components in fraudRuleMap)
@@ -38,12 +52,15 @@ public class FraudRulesHandler {
             Integer fraudScore = getScore(fraudScoreList);
 
             if (fraudScore > 0) {
+                fraudScore = fraudScore > MAX_FRAUD_SCORE ? MAX_FRAUD_SCORE : fraudScore; // fraud score cannot exceed 100
                 log.info("Total fraud score calculated::{}", fraudScore);
-                return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, messages, fraudScore > 100 ? 100 : fraudScore);
+                return new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, messages, fraudScore);
             } else {
-                return new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, 0);
+                return new FraudCheckResponse(FraudCheckResponse.RejStatus.ALLOWED, null, MIN_FRAUD_SCORE);
             }
 
+        } catch (CurrencyException ce) {
+            throw ce;
         } catch (Exception e) {
             log.error("An unexpected error occurred during fraud score calculation!", e);
             throw new FraudCheckException("An unexpected error occurred during fraud score calculation", e);
@@ -51,19 +68,16 @@ public class FraudRulesHandler {
     }
 
     public FraudCheckResponse handleInvalidTerminal() {
-        return new FraudCheckResponse(FraudCheckResponse.RejStatus.DENIED, "Invalid terminal", 100);
+        return new FraudCheckResponse(FraudCheckResponse.RejStatus.REJECTED, "Invalid terminal", MAX_FRAUD_SCORE);
     }
 
     private List<FraudRuleScore> checkFraudParallel(IncomingTransactionInfo transInfo) {
-        List<FraudRuleScore> fraudScoreList = new ArrayList<>();
         MDCStreamHelper mdc = MDCStreamHelper.getCurrentMdc();
-        fraudRuleMap.entrySet().parallelStream()
-                .forEach(rule -> {
-                        mdc.setMdc();
-                        fraudScoreList.add(fraudRuleMap.get(rule.getKey()).checkFraud(transInfo));
-                });
 
-        return fraudScoreList;
+        return applicableFraudRuleList.parallelStream()
+                .peek(i -> mdc.setMdc())
+                .map(rule -> rule.checkFraud(transInfo))
+                .collect(Collectors.toList());
     }
 
     private String getMessage(List<FraudRuleScore> fraudScoreList) {

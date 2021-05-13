@@ -13,10 +13,6 @@ spring.jpa:
 spring.h2.console.enabled: true
 spring.jpa.open-in-view: false
 
-spring.main.allow-bean-definition-overriding: true
-
-spring.security.user.password: test123
-
 server.error.include-message: always
 
 management.health:
@@ -34,8 +30,13 @@ rest.template.read.timeout.millis: 100
 card.service.url: https://card-service:9090
 terminal.service.url: http://localhost:8080/mock
 
-fraud.amount.threshold.value: 1000
-fraud.amount.threshold.currency: USD
+fraud.rule:
+  amount.score:
+    threshold.value: 1000
+    threshold.currency: USD
+  currency:
+    enabled: false
+
 fraud.card.transactions.range.hours: 24
 fraud.terminal.transactions.range.hours: 24
 
