@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,13 +59,13 @@ public class FraudDetectedService {
     public void saveFraud(FraudCheckRequest request, FraudCheckResponse response) {
         FraudDetected fraud = fraudDetectedRepository.save(createFraudDetected(request, response));
 
-        log.info("Detected fraud saved to DB with id::{}", fraud.getId());
+        log.info("Detected fraud saved to DB with id::{}", fraud.getRequestId());
     }
 
     FraudDetected createFraudDetected(FraudCheckRequest request, FraudCheckResponse response) {
         FraudDetected fraud = new FraudDetected();
-        fraud.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
         fraud.setRequestId(MDC.get(REQUEST_ID_MDC));
+        fraud.setDetectedOn(new Date());
         fraud.setAmount(request.getAmount());
         fraud.setCurrency(request.getCurrency());
         fraud.setTerminalId(request.getTerminalId());

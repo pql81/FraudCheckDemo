@@ -1,17 +1,11 @@
 spring.application.name: fraud-check
 
-spring.datasource:
-  url: jdbc:h2:mem:transdb
-  driverClassName: org.h2.Driver
-  username: sa
-  password:
-
-spring.jpa:
-  database-platform: org.hibernate.dialect.H2Dialect
-  hibernate.ddl-auto: update
-
-spring.h2.console.enabled: true
-spring.jpa.open-in-view: false
+spring:
+  data:
+    mongodb:
+      database: fraud_check
+      port: 27017
+      host: localhost
 
 server.error.include-message: always
 

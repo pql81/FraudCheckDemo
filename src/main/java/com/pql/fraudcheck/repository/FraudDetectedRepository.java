@@ -11,7 +11,7 @@ import java.util.Optional;
  * Created by pasqualericupero on 06/05/2021.
  */
 @Repository
-public interface FraudDetectedRepository extends CrudRepository<FraudDetected, Long>, MongoRepository<FraudDetected, Long> {
+public interface FraudDetectedRepository extends MongoRepository<FraudDetected, Long> {
 
     Optional<FraudDetected> findByRequestId(String requestId);
 }
