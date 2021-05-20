@@ -15,7 +15,7 @@ import java.util.UUID;
  * Created by pasqualericupero on 07/05/2021.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE+1)
+@Order(Ordered.HIGHEST_PRECEDENCE+2)
 @Log4j2
 public class LogFilter implements Filter {
 
@@ -30,6 +30,10 @@ public class LogFilter implements Filter {
         try {
             // try to retrieve the transaction id or request id from header - this is a demo so we wont't get any value here
             String reqId = request.getHeader(REQUEST_ID_HEADER);
+
+            if (reqId == null && request.getAttribute(REQUEST_ID_HEADER) != null) {
+                reqId = request.getAttribute(REQUEST_ID_HEADER).toString();
+            }
 
             // this is likely to happen!
             if (reqId == null) {

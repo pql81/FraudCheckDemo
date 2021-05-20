@@ -1,11 +1,18 @@
 package com.pql.fraudcheck.service;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -53,5 +60,33 @@ public class SimpleEncryptionServiceTest {
                     String plain = encryptionService.decrypt(card);
                     assertNotEquals(card, plain);
                 });
+    }
+
+    @Test
+    public void testJwt() throws Exception {
+        long ttlSecs = 3600*24*100;
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+
+        long expMillis = nowMillis + 1000*ttlSecs;
+        Date exp = new Date(expMillis);
+
+        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("mySuperSecret!");
+        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+
+        String jwtToken = "Bearer " + Jwts.builder()
+                .setId("trans-service")
+                .setIssuedAt(now)
+                .setSubject("ME")
+                .setIssuer("trans-service")
+                .setId(UUID.randomUUID().toString())
+                .setExpiration(exp)
+                .signWith(signatureAlgorithm, signingKey)
+                .compact();
+
+        assertNotNull(jwtToken);
+        System.out.print(jwtToken);
     }
 }

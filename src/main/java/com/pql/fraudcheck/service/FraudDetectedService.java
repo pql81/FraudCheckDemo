@@ -30,7 +30,7 @@ public class FraudDetectedService {
 
 
     public List<FraudDetected> listFrauds() {
-        Iterable<FraudDetected> frauds = fraudDetectedRepository.findAll();
+        Iterable<FraudDetected> frauds = fraudDetectedRepository.findByOrderByDetectedOnDesc();
 
         List<FraudDetected> response = StreamSupport
                 .stream(frauds.spliterator(), false)
