@@ -3,28 +3,29 @@ package com.pql.fraudcheck.domain;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 import java.util.Date;
 
 /**
  * Created by pasqualericupero on 06/05/2021.
  */
-@Entity
 @Getter @Setter @NoArgsConstructor
-@Table(name="detected_frauds")
+@Document(collection = "detected_frauds")
 public class FraudDetected {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @CreationTimestamp
-    private Date detectedOn;
+    @Version
+    private Long version;
 
     // useful for debugging/monitoring - same value held in MDC
+    @Id
     private String requestId;
+    
+    @CreatedDate
+    private Date detectedOn;
 
     private String terminalId;
     private Double amount;

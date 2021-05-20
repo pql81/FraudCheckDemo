@@ -34,7 +34,6 @@ public class FraudDetectedServiceTest {
     @Before
     public void setUp() {
         FraudDetected fraudToSave =new FraudDetected();
-        fraudToSave.setId(123L);
         fraudToSave.setMaskedCardNumber("5***********4444");
         fraudToSave.setTerminalId("test123");
 

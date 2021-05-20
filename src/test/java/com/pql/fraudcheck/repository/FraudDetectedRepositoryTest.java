@@ -38,9 +38,7 @@ public class FraudDetectedRepositoryTest {
         fraud.setFraudScore(15);
         fraud = entityManager.persistAndFlush(fraud);
 
-        assertNotNull(fraud.getId());
-
-        FraudDetected fraudFromSearch = fraudDetectedRepository.findById(fraud.getId()).get();
+        FraudDetected fraudFromSearch = fraudDetectedRepository.findByRequestId(fraud.getRequestId()).get();
 
         assertEquals(fraud, fraudFromSearch);
         assertNotNull(fraudFromSearch.getDetectedOn());
